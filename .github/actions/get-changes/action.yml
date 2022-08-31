@@ -31,6 +31,6 @@ runs:
     - name: Show changes
       shell: bash
       env:
-        CONTEXT: ${{ toJSON(steps.changes.outputs.changed_files) }}
+        CONTEXT: ${{ toJSON(steps.changes.outputs) }}
       run: |
         echo "$CONTEXT"
