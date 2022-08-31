@@ -29,7 +29,7 @@ jobs:
     outputs:
       problems: ${{ steps.run-problems.outputs.problems }}
     env:
-      FLAGPATH: ${{ runner.temp }}/flags
+      FLAGPATH: $RUNNER_TEMP/flags
     steps:
       - uses: actions/checkout@v3
 
