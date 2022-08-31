@@ -2,8 +2,11 @@ name: "Get problems"
 description: "Get problem labels from .probelms.json"
 outputs:
   problems:
-    description: "Problem labels"
+    description: "Problem labels separated by space"
     value: ${{ steps.read-problems.outputs.problems }}
+  problemsjson:
+    description: "Problem labels in JSON foramt"
+    value: ${{ steps.read-problems.outputs.problemsjson }}
 runs:
   using: "composite"
   steps:
@@ -11,5 +14,7 @@ runs:
       id: read-problems
       shell: bash
       run: |
-        problems=$(cat .problems.json)
-        echo "::set-output name=problems::$problems"
+        export PROBLEMSJSON=$(cat .problems.json)
+        echo "::set-output name=problemsjson::$PROBLEMSJSON"
+        PROBLEMS=$(python3 -c 'import json, os; print(" ".join(json.loads(os.environ.get("PROBLEMSJSON"))))')
+        echo "::set-output name=problems::$PROBLEMS"

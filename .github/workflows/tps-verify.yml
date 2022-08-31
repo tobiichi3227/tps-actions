@@ -1,0 +1,128 @@
+name: TPS verify
+
+on:
+  workflow_call:
+    inputs:
+      problems:
+        type: string
+      runs-on:
+        default: 'ubuntu-latest'
+        required: false
+        type: string
+
+# on:
+#   push:
+#     branches:
+#       - '**'
+#     paths:
+#       - 'p*/**'
+#   workflow_dispatch:
+#     inputs:
+#       target:
+#         description: 'Problem labels to verify'
+#         default: ''
+
+jobs:
+  pre-verify:
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 3
+    outputs:
+      problems: ${{ steps.run-problems.outputs.problems }}
+    env:
+      FLAGPATH: ${{ runner.temp }}/flags
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get problems
+        id: all-problems
+        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-problems@main
+
+      - name: Make flags dir
+        run: |
+          mkdir -p $FLAGPATH
+          touch $FLAGPATH/.keep
+
+      - name: Get changes
+        if: github.event_name == 'push'
+        id: changes
+        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-changes@main
+
+      - name: Check push
+        if: github.event_name == 'push'
+        shell: python3 {0}
+        env:
+          CHANGES: ${{ steps.changes.outputs.changes }}
+          PROBLEMS: ${{ steps.all-problems.outputs.problemsjson }}
+        run: |
+          import json
+          import os
+          changes = json.loads(os.environ.get('CHANGES'))
+          problems = json.loads(os.environ.get('PROBLEMS'))
+          flagpath = os.environ.get('FLAGPATH')
+          print('changes', changes['any'])
+          print('problems', problems)
+          for prob in problems:
+            print(prob, changes['any'][prob])
+            if changes['any'][prob] == 'true':
+              open(os.path.join(flagpath, prob), 'w').close()
+
+      - name: Check dispatch
+        if: github.event_name == 'workflow_dispatch'
+        shell: python3 {0}
+        env:
+          REQUESTS: ${{ github.event.inputs.problems }}
+          PROBLEMS: ${{ steps.all-problems.outputs.problemsjson }}
+        run: |
+          import json
+          import os
+          requests = os.environ.get('REQUESTS')
+          problems = json.loads(os.environ.get('PROBLEMS'))
+          flagpath = os.environ.get('FLAGPATH')
+          print('requests', requests)
+          print('problems', problems)
+          for prob in problems:
+            if prob in requests:
+              open(os.path.join(flagpath, prob), 'w').close()
+
+      - name: Read problems
+        id: run-problems
+        working-directory: ${{ env.FLAGPATH }}
+        run: |
+          PROBLEMS=$(python3 -c 'import json, glob; print(json.dumps(glob.glob("*")))')
+          echo "::set-output name=problems::$PROBLEMS"
+
+  verify:
+    needs: [pre-verify]
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    strategy:
+      matrix:
+        problem: ${{ fromJson(needs.pre-verify.outputs.problems) }}
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        if: ${{ runner.name == 'Hosted Agent' || startsWith(runner.name, 'GitHub Actions') }}
+        run: |
+          sudo apt-get install dos2unix python3-setuptools
+          sudo python3 -m pip install psutil
+
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/ioi-2017/tps/master/online-installer/install.sh)"
+
+      # - name: Verify
+      #   uses: TNFSH-Programming-Contest/tps-actions/.github/actions/verify@main
+      #   with:
+      #     path: p${{ matrix.problem }}
+
+      - name: Verify
+        working-directory: p${{ matrix.problem }}
+        run: |
+          set +e
+
+          tps verify | tee verify-result.txt
+          grep "ERROR:" verify-result.txt >/dev/null
+          if [ $? -eq 0 ]; then
+            exit 1
+          fi

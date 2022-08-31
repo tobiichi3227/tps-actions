@@ -38,6 +38,6 @@ runs:
       shell: bash
       env:
         CHANGES: ${{ toJSON(steps.changes.outputs) }}
-        PROBLEMS: ${{ steps.all-problems.outputs.problems }}
+        PROBLEMS: ${{ steps.all-problems.outputs.problemsjson }}
       run: |
         python3 parse.py
