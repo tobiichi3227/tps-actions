@@ -17,8 +17,6 @@ jobs:
     timeout-minutes: 3
     outputs:
       problems: ${{ steps.run-problems.outputs.problems }}
-    env:
-      FLAGPATH: $RUNNER_TEMP/flags
     steps:
       - uses: actions/checkout@v3
 
@@ -45,8 +43,8 @@ jobs:
           requests: ${{ env.REQUEST }}
 
   verify:
-    if: ${{ needs.pre-verify.outputs.problems != '[]' && needs.pre-verify.outputs.problems != '' }}
     needs: [pre-verify]
+    if: needs.pre-verify.outputs.problems != '[]'
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 3
     strategy:

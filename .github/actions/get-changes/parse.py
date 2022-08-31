@@ -15,6 +15,7 @@ flags = {
     'tests': {},
     'input': {},
     'output': {},
+    'solutions': {},
     'pdf': {},
     'verify': {},
 }

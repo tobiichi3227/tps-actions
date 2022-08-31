@@ -1,0 +1,134 @@
+name: Build tests
+
+on:
+  workflow_call:
+    inputs:
+      input:
+        description: 'Problem labels to build inputs'
+        type: string
+        default: ''
+      output:
+        description: 'Problem labels to build outputs'
+        type: string
+        default: ''
+      solution:
+        description: 'Problem labels to run solutions'
+        type: string
+        default: ''
+      runs-on:
+        default: 'ubuntu-latest'
+        required: false
+        type: string
+
+jobs:
+  pre-build:
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 3
+    outputs:
+      problems: ${{ steps.run-problems.outputs.problems }}
+      input: ${{ fromJson(steps.changes.outputs.changes).input }}
+      output: ${{ fromJson(steps.changes.outputs.changes).output }}
+      solutions: ${{ fromJson(steps.changes.outputs.changes).solutions }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get changes
+        if: github.event_name == 'push'
+        id: changes
+        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-changes@main
+
+      - name: Check push
+        if: github.event_name == 'push'
+        run: |
+          echo "${{ steps.changes.outputs.changes }}"
+          echo "REQUEST=${{ fromJson(steps.changes.outputs.changes).tests }}" >> $GITHUB_ENV
+
+      - name: Check dispatch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "REQUEST=${{ inputs.input }}${{ inputs.output }}${{ inputs.solutions }}" >> $GITHUB_ENV
+
+      - name: Filter problems
+        id: run-problems
+        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/run-problems@main
+        with:
+          requests: ${{ env.REQUEST }}
+
+  build-tests:
+    needs: [pre-build]
+    if: needs.pre-verify.outputs.problems != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        problem: ${{ fromJson(needs.pre-build.outputs.problems) }}
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/install-tps@main
+        if: ${{ runner.name == 'Hosted Agent' || startsWith(runner.name, 'GitHub Actions') }}
+
+      - name: Setup git
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Build inputs and outputs
+        if: contains(needs.pre-build.outputs.input, matrix.problem)
+        working-directory: p${{ matrix.problem }}
+        run: |
+          echo "Building input for ${{ matrix.problem }}"
+          tps gen -s
+          git status
+          git add gen/data
+          git add tests/*.in
+          git add tests/*.out
+          git add tests/gen_summary
+          git add tests/mapping
+          git pull
+          git diff --cached --quiet || git commit -m "p${{ matrix.problem }} Build inputs and outputs
+
+          Co-Authored-By: ${{ github.event.sender.login }} <${{ github.event.sender.id }}+${{ github.event.sender.login }}@users.noreply.github.com>"
+          git push
+
+      - name: Build outputs
+        if: contains(needs.pre-build.outputs.output, matrix.problem)
+        working-directory: p${{ matrix.problem }}
+        run: |
+          echo "Building output for ${{ matrix.problem }}"
+          tps gen -s --no-gen
+          git status
+          git add tests/*.out
+          git pull
+          git diff --cached --quiet || git commit -m "p${{ matrix.problem }} Build outputs
+
+          Co-Authored-By: ${{ github.event.sender.login }} <${{ github.event.sender.id }}+${{ github.event.sender.login }}@users.noreply.github.com>"
+          git push
+
+      - name: Check tests changes
+        id: tests-changes
+        run: |
+          set +e
+
+          git diff ${{ github.sha }}..HEAD --quiet p${{ matrix.problem }}/tests/*.in p${{ matrix.problem }}/tests/*.out
+          if [ $? -ne 0 ]; then
+            echo "::set-output name=changed::true"
+            echo "Tests changed"
+          else
+            echo "No changes in tests";
+          fi
+
+      - name: Run solutions
+        if: contains(needs.pre-build.outputs.solutions, matrix.problem) || steps.tests-changes.outputs.changed == 'true'
+        working-directory: p${{ matrix.problem }}
+        run: |
+          echo "Run solutions for ${{ matrix.problem }}"
+          rm -f solutions-check.txt
+          tps solutions | tee -a solutions-check.txt
+          git status
+          git add solutions-check.txt
+          git pull
+          git diff --cached --quiet || git commit -m "p${{ matrix.problem }} Run solutions"
+          git push
