@@ -4,6 +4,7 @@ on:
   workflow_call:
     inputs:
       problems:
+        default: ''
         type: string
       runs-on:
         default: 'ubuntu-latest'
@@ -28,56 +29,16 @@ jobs:
       - name: Make flags dir
         run: |
           mkdir -p $FLAGPATH
-          touch $FLAGPATH/.keep
 
       - name: Get changes
         if: github.event_name == 'push'
         id: changes
         uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-changes@main
 
-      - name: Check push
-        if: github.event_name == 'push'
-        shell: python3 {0}
-        env:
-          CHANGES: ${{ steps.changes.outputs.changes }}
-          PROBLEMS: ${{ steps.all-problems.outputs.problemsjson }}
-        run: |
-          import json
-          import os
-          changes = json.loads(os.environ.get('CHANGES'))
-          problems = json.loads(os.environ.get('PROBLEMS'))
-          flagpath = os.environ.get('FLAGPATH')
-          print('changes', changes['any'])
-          print('problems', problems)
-          for prob in problems:
-            print(prob, changes['any'][prob])
-            if changes['any'][prob] == 'true':
-              open(os.path.join(flagpath, prob), 'w').close()
-
-      - name: Check dispatch
-        if: github.event_name == 'workflow_dispatch'
-        shell: python3 {0}
-        env:
-          REQUESTS: ${{ inputs.problems }}
-          PROBLEMS: ${{ steps.all-problems.outputs.problemsjson }}
-        run: |
-          import json
-          import os
-          requests = os.environ.get('REQUESTS')
-          problems = json.loads(os.environ.get('PROBLEMS'))
-          flagpath = os.environ.get('FLAGPATH')
-          print('requests', requests)
-          print('problems', problems)
-          for prob in problems:
-            if prob in requests:
-              open(os.path.join(flagpath, prob), 'w').close()
-
-      - name: Read problems
-        id: run-problems
-        working-directory: ${{ env.FLAGPATH }}
-        run: |
-          PROBLEMS=$(python3 -c 'import json, glob; print(json.dumps(glob.glob("*")))')
-          echo "::set-output name=problems::$PROBLEMS"
+      - name: Filter problems
+        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-changes@main
+        with:
+          requests: ${{ steps.changes.outputs.changes }}${{ inputs.problems }}
 
   verify:
     if: ${{ needs.pre-verify.outputs.problems != '[]' && needs.pre-verify.outputs.problems != '' }}

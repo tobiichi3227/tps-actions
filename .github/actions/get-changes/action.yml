@@ -30,8 +30,58 @@ runs:
             - 'template.tex'
           cover:
             - 'cover.tex'
-          any:
+          verify:
             - 'p*/**'
+
+    - name: Check changes in config
+      if: github.event_name == 'push'
+      shell: bash
+      run: |
+        set +e
+
+        FLAGPATH=$RUNNER_TEMP/flags
+        mkdir -p $FLAGPATH
+
+        PROBLEMS=${{ steps.all-problems.outputs.problems }}
+
+        for pro in $PROBLEMS; do
+          echo "Check $pro"
+
+          git diff ${{ github.event.before }}..HEAD -U0 p${pro}/problem.json | grep '"time_limit"'
+          if [ $? -eq 0 ]; then
+            echo "$pro" > $FLAGPATH/solution-${pro}
+          else
+            echo "No changes in problem.json for solutions";
+          fi
+
+          git diff ${{ github.event.before }}..HEAD -U0 p${pro}/solutions.json | grep '"model_solution"'
+          if [ $? -eq 0 ]; then
+            echo "$pro" > $FLAGPATH/input-${pro}
+          else
+            echo "No changes in solutions.json for input";
+          fi
+
+          git diff ${{ github.event.before }}..HEAD -U0 p${pro}/subtasks.json | grep '"score"'
+          if [ $? -eq 0 ]; then
+            echo "$pro" > $FLAGPATH/solution-${pro}
+          else
+            echo "No changes in subtasks.json for solutions";
+          fi
+
+          git diff ${{ github.event.before }}..HEAD -U0 p${pro}/problem.json | grep '"contest_name"\|"problem_label"\|"name"\|"title"\|"memory_limit"\|"time_limit"'
+          if [ $? -eq 0 ]; then
+            echo "$pro" > $FLAGPATH/pdf-${pro}
+          else
+            echo "No changes in problem.json for pdf";
+          fi
+
+          git diff ${{ github.event.before }}..HEAD -U0 p${pro}/subtasks.json | grep '"index"\|"score"\|"text"'
+          if [ $? -eq 0 ]; then
+            echo "$pro" > $FLAGPATH/pdf-${pro}
+          else
+            echo "No changes in subtasks.json for pdf";
+          fi
+        done
 
     - name: Process
       id: process-changes
@@ -40,5 +90,6 @@ runs:
       env:
         CHANGES: ${{ toJSON(steps.changes.outputs) }}
         PROBLEMS: ${{ steps.all-problems.outputs.problemsjson }}
+        FLAGPATH: ${{ runner.temp }}/flags
       run: |
         python3 parse.py

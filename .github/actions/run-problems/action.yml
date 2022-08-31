@@ -1,0 +1,24 @@
+name: "Filter problems to run"
+description: ""
+inputs:
+  requests:
+    required: true
+outputs:
+  problems:
+    value: ${{ steps.run-problems.outputs.problems }}
+runs:
+  using: "composite"
+  steps:
+    - name: Get problems
+      id: all-problems
+      uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-problems@main
+
+    - name: Process
+      id: run-problems
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      env:
+        REQUESTS: ${{ inputs.requests }}
+        PROBLEMS: ${{ steps.all-problems.outputs.problemsjson }}
+      run: |
+        python3 filter.py
