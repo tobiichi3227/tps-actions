@@ -6,6 +6,7 @@ on:
       problems:
         description: 'Problem labels to build (A-Z)'
         default: ''
+        type: string
       merge:
         description: 'Merge pdfs?'
         default: false
