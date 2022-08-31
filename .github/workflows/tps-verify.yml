@@ -35,11 +35,22 @@ jobs:
         id: changes
         uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-changes@main
 
-      - name: Env
+      - name: Env 1
+        if: github.event_name == 'push'
         run: |
           echo "${{ steps.changes.outputs.changes }}"
-          echo "${{ steps.changes.outputs.changes.verify }}"
+          echo "${{ fromJson(steps.changes.outputs.changes).verify }}"
+          REQUEST="${{ fromJson(steps.changes.outputs.changes).verify }}"
+
+      - name: Env 2
+        if: github.event_name == 'workflow_dispatch'
+        run: |
           echo "${{ inputs.problems }}"
+          REQUEST="${{ inputs.problems }}"
+
+      - name: Env 3
+        run: |
+          echo $REQUEST
 
       - name: Filter problems
         id: run-problems
