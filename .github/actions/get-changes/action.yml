@@ -40,4 +40,5 @@ runs:
         CHANGES: ${{ toJSON(steps.changes.outputs) }}
         PROBLEMS: ${{ steps.all-problems.outputs.problemsjson }}
       run: |
-        python3 parse.py
+        pwd
+        python3 .github/actions/get-changes/parse.py
