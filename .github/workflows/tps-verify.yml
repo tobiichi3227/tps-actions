@@ -40,13 +40,13 @@ jobs:
         run: |
           echo "${{ steps.changes.outputs.changes }}"
           echo "${{ fromJson(steps.changes.outputs.changes).verify }}"
-          REQUEST="${{ fromJson(steps.changes.outputs.changes).verify }}"
+          export REQUEST="${{ fromJson(steps.changes.outputs.changes).verify }}"
 
       - name: Env 2
         if: github.event_name == 'workflow_dispatch'
         run: |
           echo "${{ inputs.problems }}"
-          REQUEST="${{ inputs.problems }}"
+          export REQUEST="${{ inputs.problems }}"
 
       - name: Env 3
         run: |
