@@ -33,4 +33,4 @@ runs:
       env:
         CONTEXT: ${{ toJSON(steps.changes.outputs.changed_files) }}
       run: |
-        echo $CONTEXT
+        echo "$CONTEXT"
