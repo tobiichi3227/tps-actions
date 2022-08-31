@@ -117,10 +117,10 @@ jobs:
         uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-problems@main
 
       - name: Merge pdfs
-        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.merge)
+        if: (github.event_name == 'push' && contains(github.event.head_commit.message, '[merge pdf]')) || (github.event_name == 'workflow_dispatch' && inputs.merge)
         run: |
           MERGECMD="pdfunite "
-          for prob in ${{ steps.all-problems.outputs.problemsjson }}; do
+          for prob in ${{ steps.all-problems.outputs.problems }}; do
             echo "Check $prob"
             if [ -f "p${prob}/statement/index.pdf" ]; then
               MERGECMD="$MERGECMD p${prob}/statement/index.pdf"
@@ -140,7 +140,7 @@ jobs:
       - name: Commit pdf
         run: |
           git status
-          for prob in ${{ steps.all-problems.outputs.problemsjson }}; do
+          for prob in ${{ steps.all-problems.outputs.problems }}; do
             git add p${prob}/statement/index.pdf
           done
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
