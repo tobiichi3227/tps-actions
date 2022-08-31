@@ -72,6 +72,7 @@ runs:
             solutions = json.load(f)
           for file, val in solutions.items():
             if val.get('verdict') == 'model_solution':
+              print('Check', 'p{}/{}'.format(pro, file))
               if 'p{}/{}'.format(pro, file) in solutions_files:
                 result['output'][pro] = 'true'
                 result['solutions'][pro] = 'true'
