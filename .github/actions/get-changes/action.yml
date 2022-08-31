@@ -69,7 +69,8 @@ runs:
             if key == 'pdf':
               result[key][pro] = changes['template']
               print('pdf/{} set to {} due to template'.format(pro, changes['template']))
-          for file in changes['{}_files'.format(key)]:
+          for file in json.loads(changes['{}_files'.format(key)]):
+            print('Check', file)
             for prefix, pro in prefixes.items():
               if file.startswith(prefix):
                 result[key][pro] = 'true'
