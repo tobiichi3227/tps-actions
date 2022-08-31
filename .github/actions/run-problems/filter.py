@@ -12,4 +12,5 @@ for pro in problems:
         result.append(pro)
 
 print('result:', result)
-print('::set-output name=problems::{}'.format(json.dumps(result)))
+print('::set-output name=problemsjson::{}'.format(json.dumps(result)))
+print('::set-output name=problems::{}'.format(' '.join(result)))

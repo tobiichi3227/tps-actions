@@ -5,7 +5,7 @@ inputs:
     required: true
 outputs:
   problems:
-    value: ${{ steps.run-problems.outputs.problems }}
+    value: ${{ steps.run-problems.outputs.problemsjson }}
 runs:
   using: "composite"
   steps:

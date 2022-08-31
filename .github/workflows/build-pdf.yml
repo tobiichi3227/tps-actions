@@ -1,0 +1,145 @@
+name: Build pdf
+
+on:
+  workflow_call:
+    inputs:
+      problems:
+        description: 'Problem labels to build (A-Z), "+" to merge pdfs'
+        default: ''
+      merge:
+        description: 'Merge pdfs?'
+        default: false
+        type: boolean
+
+jobs:
+  pre-build:
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 3
+    outputs:
+      problems: ${{ steps.run-problems.outputs.problemsjson }}
+      pdf: ${{ steps.run-problems.outputs.problems }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get changes
+        if: github.event_name == 'push'
+        id: changes
+        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-changes@main
+
+      - name: Check push
+        if: github.event_name == 'push'
+        run: |
+          echo "${{ steps.changes.outputs.changes }}"
+          echo "REQUEST=${{ fromJson(steps.changes.outputs.changes).pdf }}" >> $GITHUB_ENV
+
+      - name: Check dispatch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "REQUEST=${{ inputs.problems }}" >> $GITHUB_ENV
+
+      - name: Filter problems
+        id: run-problems
+        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/run-problems@main
+        with:
+          requests: ${{ env.REQUEST }}
+
+  build-pdf:
+    needs: [pre-build]
+    if: needs.pre-build.outputs.problems != '[]' || (github.event_name == 'workflow_dispatch' && inputs.merge)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/install-tps@main
+        if: ${{ runner.name == 'Hosted Agent' || startsWith(runner.name, 'GitHub Actions') }}
+
+      - name: Install dependencies
+        if: ${{ runner.name == 'Hosted Agent' || startsWith(runner.name, 'GitHub Actions') }}
+        run: |
+          wget https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-1-amd64.deb
+          sudo dpkg -i pandoc-2.10.1-1-amd64.deb
+
+          sudo apt-get install texlive-xetex
+
+          sudo mkdir -p /usr/share/fonts/opentype/noto
+          wget -nv https://noto-website-2.storage.googleapis.com/pkgs/NotoSansCJK-Regular.ttc.zip
+          unzip NotoSansCJK-Regular.ttc.zip -d NotoSansCJK-Regular
+          ls -al NotoSansCJK-Regular
+          sudo cp NotoSansCJK-Regular/NotoSansCJK-Regular.ttc /usr/share/fonts/opentype/noto
+          wget -nv https://noto-website-2.storage.googleapis.com/pkgs/NotoSansCJK-Bold.ttc.zip
+          unzip NotoSansCJK-Bold.ttc.zip -d NotoSansCJK-Bold
+          ls -al NotoSansCJK-Bold
+          sudo cp NotoSansCJK-Bold/NotoSansCJK-Bold.ttc /usr/share/fonts/opentype/noto
+          ls -al /usr/share/fonts/opentype/noto
+          sudo fc-cache -f -v
+
+          sudo apt-get install poppler-utils
+
+      - name: Check environment
+        working-directory: pA
+        run: |
+          lsb_release -a
+          echo ""
+          pandoc -v
+          echo ""
+          xetex -v
+          echo ""
+          tps || :;
+          echo ""
+          fc-list | grep "Noto Sans Mono CJK TC" || :;
+          echo ""
+          pdfunite -v
+
+      - name: Build pdfs
+        run: |
+          for prob in ${{ needs.pre-build.outputs.pdf }}; do
+            echo "Build $prob"
+            cd p${prob} && tps statement && cd ..
+          done
+
+      - name: Merge cover into pA
+        if: contains(needs.pre-build.outputs.pdf, 'A')
+        run: |
+          xelatex cover.tex
+          pdfunite cover.pdf pA/statement/index.pdf pA/statement/index-with-cover.pdf
+          rm pA/statement/index.pdf
+          mv pA/statement/index-with-cover.pdf pA/statement/index.pdf
+
+      - name: Get problems
+        id: all-problems
+        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-problems@main
+
+      - name: Merge pdfs
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.merge)
+        run: |
+          MERGECMD="pdfunite "
+          for prob in ${{ steps.all-problems.outputs.problemsjson }}; do
+            echo "Check $prob"
+            if [ -f "p${prob}/statement/index.pdf" ]; then
+              MERGECMD="$MERGECMD p${prob}/statement/index.pdf"
+            fi
+          done
+          MERGECMD="$MERGECMD pA/attachments/problems.pdf"
+
+          echo $MERGECMD
+          mkdir -p pA/attachments
+          $MERGECMD
+          git add pA/attachments/problems.pdf
+
+      - name: Check diff
+        run: |
+          git diff --name-only
+
+      - name: Commit pdf
+        run: |
+          git status
+          for prob in ${{ steps.all-problems.outputs.problemsjson }}; do
+            git add p${prob}/statement/index.pdf
+          done
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git pull
+          git diff-index --quiet HEAD -- || git commit -m "Build pdfs"
+          git push

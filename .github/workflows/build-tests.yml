@@ -25,7 +25,7 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 3
     outputs:
-      problems: ${{ steps.run-problems.outputs.problems }}
+      problems: ${{ steps.run-problems.outputs.problemsjson }}
       input: ${{ env.REQIN }}
       output: ${{ env.REQOUT }}
       solutions: ${{ env.REQSOL }}
