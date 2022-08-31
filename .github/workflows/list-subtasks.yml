@@ -55,13 +55,13 @@ jobs:
               output += ' {}<br>{} |'.format(subtask[0], subtask[1])
             output += '\n'
 
-          with open('README.md', 'r+', encoding='utf8') as f:
+          with open('README.md', 'r', encoding='utf8') as f:
             text = f.read()
-            flag = '<!-- subtasks start -->'
-            idx1 = text.index(flag)
-            idx2 = text.index('<!-- subtasks end -->')
-            text = text[:idx1] + flag + '\n' + output + text[idx2:]
-            f.seek(0)
+          flag = '<!-- subtasks start -->'
+          idx1 = text.index(flag)
+          idx2 = text.index('<!-- subtasks end -->')
+          text = text[:idx1] + flag + '\n' + output + text[idx2:]
+          with open('README.md', 'w', encoding='utf8') as f:
             f.write(text)
 
       - name: Commit files
