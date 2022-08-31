@@ -9,6 +9,7 @@ runs:
   steps:
     - name: Read problems
       id: read-problems
+      shell: bash
       run: |
         problems=$(cat .problems.json)
         echo "::set-output name=matrix::$problems"
