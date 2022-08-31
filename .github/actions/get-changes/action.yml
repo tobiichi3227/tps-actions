@@ -3,9 +3,9 @@ description: "Get changed files in commits"
 runs:
   using: "composite"
   steps:
-    # - name: Get problems
-    #   id: all-problems
-    #   uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-problems@main
+    - name: Get problems
+      id: all-problems
+      uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-problems@main
 
     - uses: dorny/paths-filter@v2
       id: changes
@@ -22,15 +22,67 @@ runs:
             - '*/statement/*.jpg'
             - '*/statement/DISABLE_AUTO_BUILD'
             - '*/statement/index.md'
+          template:
             - 'template.tex'
           cover:
             - 'cover.tex'
           any:
             - 'p*/**'
 
-    - name: Show changes
+    - name: Show env
       shell: bash
       env:
         CONTEXT: ${{ toJSON(steps.changes.outputs) }}
+        PROBLEMS: ${{ steps.all-problems.outputs.problems }}
       run: |
         echo "$CONTEXT"
+        echo "$PROBLEMS"
+
+    - name: Process
+      shell: python3 {0}
+      env:
+        CONTEXT: ${{ toJSON(steps.changes.outputs) }}
+        PROBLEMS: ${{ steps.all-problems.outputs.problems }}
+      run: |
+        import json
+
+        problems = json.load('${{ steps.all-problems.outputs.problems }}')
+        changes = json.load('${{ toJSON(steps.changes.outputs) }}')
+        keys = ['input', 'solutions', 'pdf', 'any']
+        prefixes = {}
+        for pro in problems:
+          prefixes['p{}/'.format(pro)] = pro
+
+        print('problems', problems)
+        print('changes', changes)
+
+        result = {}
+        result['template'] = changes['template']
+        result['cover'] = changes['cover']
+        for key in keys:
+          result[key] = {}
+          for pro in problems:
+            result[key][pro] = 'false'
+            if key == 'pdf':
+              result[key][pro] = changes['template']
+              print('pdf/{} set to {} due to template'.format(pro, changes['template']))
+          for file in changes['{}_files'.format(key)]:
+            for prefix, pro in prefixes.items():
+              if file.startswith(prefix):
+                result[key][pro] = 'true'
+                print('{}/{} set to true due to {}'.format(key, pro, file))
+                break
+        result['output'] = {}
+        for pro in problems:
+          result['output'][pro] = 'false'
+          with open('p{}/solutions.json', 'r', encoding='utf8') as f:
+            solutions = json.load(f)
+          for file, val in solutions.items():
+            if val.get('verdict') == 'model_solution':
+              if 'p{}/{}'.format(pro, file) in changes['solutions_files']:
+                result['output'][pro] = 'true'
+                result['solutions'][pro] = 'true'
+                print('output,solutions/{} set to true due to {}'.format(pro, file))
+              break
+
+        print('result', result)
