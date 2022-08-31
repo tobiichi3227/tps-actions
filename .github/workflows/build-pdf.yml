@@ -101,7 +101,7 @@ jobs:
         run: |
           for prob in ${{ needs.pre-build.outputs.pdf }}; do
             echo "Build $prob"
-            cd p${prob} && tps statement && cd ..
+            cd p${prob} && tps statement && git add statement/index.pdf && cd ..
           done
 
       - name: Merge cover into pA
@@ -111,6 +111,7 @@ jobs:
           pdfunite cover.pdf pA/statement/index.pdf pA/statement/index-with-cover.pdf
           rm pA/statement/index.pdf
           mv pA/statement/index-with-cover.pdf pA/statement/index.pdf
+          git add pA/statement/index.pdf
 
       - name: Get problems
         id: all-problems
@@ -133,16 +134,9 @@ jobs:
           $MERGECMD
           git add pA/attachments/problems.pdf
 
-      - name: Check diff
-        run: |
-          git diff --name-only
-
       - name: Commit pdf
         run: |
           git status
-          for prob in ${{ steps.all-problems.outputs.problems }}; do
-            git add --ignore-missing p${prob}/statement/index.pdf
-          done
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git pull
