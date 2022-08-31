@@ -1,6 +1,8 @@
 import json
 import os
 
+os.chdir(os.environ.get('GITHUB_WORKSPACE'))
+
 problems = json.loads(os.environ.get('PROBLEMS'))
 changes = json.loads(os.environ.get('CHANGES'))
 keys = ['input', 'solutions', 'pdf', 'any']
