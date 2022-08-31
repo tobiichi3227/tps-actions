@@ -32,23 +32,25 @@ runs:
     - name: Show env
       shell: bash
       env:
-        CONTEXT: ${{ toJSON(steps.changes.outputs) }}
+        CHANGES: ${{ toJSON(steps.changes.outputs) }}
+        ALLPROBLEMS: ${{ steps.all-problems.outputs }}
         PROBLEMS: ${{ steps.all-problems.outputs.problems }}
       run: |
-        echo "$CONTEXT"
+        echo "$CHANGES"
+        echo "$ALLPROBLEMS"
         echo "$PROBLEMS"
 
     - name: Process
       shell: python3 {0}
       env:
-        CONTEXT: ${{ toJSON(steps.changes.outputs) }}
+        CHANGES: ${{ toJSON(steps.changes.outputs) }}
         PROBLEMS: ${{ steps.all-problems.outputs.problems }}
       run: |
         import json
         import os
 
         problems = json.loads(os.environ.get('PROBLEMS'))
-        changes = json.loads(os.environ.get('CONTEXT'))
+        changes = json.loads(os.environ.get('CHANGES'))
         keys = ['input', 'solutions', 'pdf', 'any']
         prefixes = {}
         for pro in problems:
