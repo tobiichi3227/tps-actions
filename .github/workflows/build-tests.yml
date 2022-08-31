@@ -26,9 +26,9 @@ jobs:
     timeout-minutes: 3
     outputs:
       problems: ${{ steps.run-problems.outputs.problems }}
-      input: ${{ fromJson(steps.changes.outputs.changes).input }}
-      output: ${{ fromJson(steps.changes.outputs.changes).output }}
-      solutions: ${{ fromJson(steps.changes.outputs.changes).solutions }}
+      input: ${{ env.REQIN }}
+      output: ${{ env.REQOUT }}
+      solutions: ${{ env.REQSOL }}
     steps:
       - uses: actions/checkout@v3
 
@@ -42,11 +42,17 @@ jobs:
         run: |
           echo "${{ steps.changes.outputs.changes }}"
           echo "REQUEST=${{ fromJson(steps.changes.outputs.changes).tests }}" >> $GITHUB_ENV
+          echo "REQIN=${{ fromJson(steps.changes.outputs.changes).input }}" >> $GITHUB_ENV
+          echo "REQOUT=${{ fromJson(steps.changes.outputs.changes).output }}" >> $GITHUB_ENV
+          echo "REQSOL=${{ fromJson(steps.changes.outputs.changes).solutions }}" >> $GITHUB_ENV
 
       - name: Check dispatch
         if: github.event_name == 'workflow_dispatch'
         run: |
           echo "REQUEST=${{ inputs.input }}${{ inputs.output }}${{ inputs.solutions }}" >> $GITHUB_ENV
+          echo "REQIN=${{ inputs.input }}" >> $GITHUB_ENV
+          echo "REQOUT=${{ inputs.output }}" >> $GITHUB_ENV
+          echo "REQSOL=${{ inputs.solutions }}" >> $GITHUB_ENV
 
       - name: Filter problems
         id: run-problems
