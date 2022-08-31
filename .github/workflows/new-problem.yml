@@ -59,11 +59,6 @@ jobs:
             path = 'p{}'.format(label)
             if not os.path.exists(path):
               subprocess.run(['tps', 'init', path, '-T', 'tps-task-templates', '-t', 'default'])
-              subprocess.run(['git', 'add', path])
-
-              problems.append(label)
-              makefile = makefile.replace('# NEWPROBELM', 'import-{0}:\n\tcmsImportTask ./{0}/ -u $(if $(s), , --no-statement)\n\n# NEWPROBELM'.format(path))
-              readme = readme.replace('<!-- new problem -->', '| {0} | [statement]({1}/statement) [md]({1}/statement/index.md) [pdf]({1}/statement/index.pdf) | [gen]({1}/gen) | [validator]({1}/validator) | [solution]({1}/solution) [check]({1}/solutions-check.txt) | [tests]({1}/tests) | [problem]({1}/problem.json) [solutions]({1}/solutions.json) [subtasks]({1}/subtasks.json) |\n<!-- new problem -->'.format(label, path))
 
               with open('{}/problem.json'.format(path), 'r+', encoding='utf8') as f:
                 text = json.load(f)
@@ -71,6 +66,12 @@ jobs:
                 f.seek(0)
                 f.write(json.dumps(text, indent='\t', ensure_ascii=False))
                 f.write('\n')
+
+              subprocess.run(['git', 'add', path])
+
+              problems.append(label)
+              makefile = makefile.replace('# NEWPROBELM', 'import-{0}:\n\tcmsImportTask ./{0}/ -u $(if $(s), , --no-statement)\n\n# NEWPROBELM'.format(path))
+              readme = readme.replace('<!-- new problem -->', '| {0} | [statement]({1}/statement) [md]({1}/statement/index.md) [pdf]({1}/statement/index.pdf) | [gen]({1}/gen) | [validator]({1}/validator) | [solution]({1}/solution) [check]({1}/solutions-check.txt) | [tests]({1}/tests) | [problem]({1}/problem.json) [solutions]({1}/solutions.json) [subtasks]({1}/subtasks.json) |\n<!-- new problem -->'.format(label, path))
             else:
               print('{} is exists'.format(path))
           with open('.problems.json', 'w', encoding='utf8') as f:
