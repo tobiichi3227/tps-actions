@@ -44,6 +44,7 @@ for pro in problems:
     for file in solutions_files:
         if file.startswith(prefix):
             flags['tests'][pro] = True
+            flags['solutions'][pro] = True
             print('Set tests/{} to true due to {}'.format(pro, file))
             break
 
