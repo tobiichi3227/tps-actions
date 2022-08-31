@@ -80,6 +80,7 @@ jobs:
           echo "::set-output name=problems::$PROBLEMS"
 
   verify:
+    if: ${{ needs.pre-verify.outputs.problems != '[]' && needs.pre-verify.outputs.problems != '' }}
     needs: [pre-verify]
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 3
