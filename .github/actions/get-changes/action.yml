@@ -13,9 +13,9 @@ runs:
         list-files: 'json'
         filters: |
           input:
-            - */gen/**
+            - '*/gen/**'
           solutions:
-            - */solution/**
+            - '*/solution/**'
             - */solutions.json
           pdf:
             - */scripts/statement.sh
@@ -26,7 +26,7 @@ runs:
           cover:
             - cover.tex
           any:
-            - p*/**
+            - 'p*/**'
 
     - name: Show changes
       shell: bash
