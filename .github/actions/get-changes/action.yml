@@ -78,7 +78,7 @@ runs:
         result['output'] = {}
         for pro in problems:
           result['output'][pro] = 'false'
-          with open('p{}/solutions.json', 'r', encoding='utf8') as f:
+          with open('p{}/solutions.json'.format(pro), 'r', encoding='utf8') as f:
             solutions = json.load(f)
           for file, val in solutions.items():
             if val.get('verdict') == 'model_solution':
