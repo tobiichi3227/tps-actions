@@ -10,18 +10,6 @@ on:
         required: false
         type: string
 
-# on:
-#   push:
-#     branches:
-#       - '**'
-#     paths:
-#       - 'p*/**'
-#   workflow_dispatch:
-#     inputs:
-#       target:
-#         description: 'Problem labels to verify'
-#         default: ''
-
 jobs:
   pre-verify:
     runs-on: ${{ inputs.runs-on }}
@@ -103,18 +91,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install dependencies
+      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/install-tps@main
         if: ${{ runner.name == 'Hosted Agent' || startsWith(runner.name, 'GitHub Actions') }}
-        run: |
-          sudo apt-get install dos2unix python3-setuptools
-          sudo python3 -m pip install psutil
-
-          bash -c "$(curl -fsSL https://raw.githubusercontent.com/ioi-2017/tps/master/online-installer/install.sh)"
-
-      # - name: Verify
-      #   uses: TNFSH-Programming-Contest/tps-actions/.github/actions/verify@main
-      #   with:
-      #     path: p${{ matrix.problem }}
 
       - name: Verify
         working-directory: p${{ matrix.problem }}
