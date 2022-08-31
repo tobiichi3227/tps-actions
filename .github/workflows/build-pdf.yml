@@ -141,7 +141,7 @@ jobs:
         run: |
           git status
           for prob in ${{ steps.all-problems.outputs.problems }}; do
-            git add p${prob}/statement/index.pdf
+            git add --ignore-missing p${prob}/statement/index.pdf
           done
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
