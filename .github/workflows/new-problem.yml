@@ -60,11 +60,11 @@ jobs:
             if not os.path.exists(path):
               subprocess.run(['tps', 'init', path, '-T', 'tps-task-templates', '-t', 'default'])
 
-              with open('{}/problem.json'.format(path), 'r+', encoding='utf8') as f:
-                text = json.load(f)
-                text['problem_label'] = label
-                f.seek(0)
-                f.write(json.dumps(text, indent='\t', ensure_ascii=False))
+              with open('{}/problem.json'.format(path), 'r', encoding='utf8') as f:
+                data = json.load(f)
+              data['problem_label'] = label
+              with open('{}/problem.json'.format(path), 'w', encoding='utf8') as f:
+                f.write(json.dumps(data, indent='\t', ensure_ascii=False))
                 f.write('\n')
 
               subprocess.run(['git', 'add', path])
