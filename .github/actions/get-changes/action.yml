@@ -36,6 +36,7 @@ runs:
     - name: Process
       id: process-changes
       shell: bash
+      working-directory: ${{ github.action_path }}
       env:
         CHANGES: ${{ toJSON(steps.changes.outputs) }}
         PROBLEMS: ${{ steps.all-problems.outputs.problemsjson }}
