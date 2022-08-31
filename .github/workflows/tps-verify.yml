@@ -22,35 +22,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Get problems
-        id: all-problems
-        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-problems@main
-
-      - name: Make flags dir
-        run: |
-          mkdir -p $FLAGPATH
-
       - name: Get changes
         if: github.event_name == 'push'
         id: changes
         uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-changes@main
 
-      - name: Env 1
+      - name: Check push
         if: github.event_name == 'push'
         run: |
           echo "${{ steps.changes.outputs.changes }}"
-          echo "${{ fromJson(steps.changes.outputs.changes).verify }}"
           echo "REQUEST=${{ fromJson(steps.changes.outputs.changes).verify }}" >> $GITHUB_ENV
 
-      - name: Env 2
+      - name: Check dispatch
         if: github.event_name == 'workflow_dispatch'
         run: |
-          echo "${{ inputs.problems }}"
           echo "REQUEST=${{ inputs.problems }}" >> $GITHUB_ENV
-
-      - name: Env 3
-        run: |
-          echo $REQUEST
 
       - name: Filter problems
         id: run-problems
