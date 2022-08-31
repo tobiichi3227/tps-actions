@@ -11,7 +11,7 @@ on:
         description: 'Problem labels to build outputs'
         type: string
         default: ''
-      solution:
+      solutions:
         description: 'Problem labels to run solutions'
         type: string
         default: ''
