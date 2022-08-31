@@ -1,14 +1,14 @@
 name: "Verify"
 description: "Verify a problem"
 inputs:
-  working-directory:
-    description: "Working directory"
+  path:
+    description: "Problem path to verify"
     required: true
 runs:
   using: "composite"
   steps:
-    - name: Verify ${{ inputs.working-directory }}
-      working-directory: ${{ inputs.working-directory }}
+    - name: Verify ${{ inputs.path }}
+      working-directory: ${{ inputs.path }}
       run: |
         set +e
 
