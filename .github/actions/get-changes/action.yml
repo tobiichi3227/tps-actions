@@ -47,8 +47,8 @@ runs:
         import json
         import os
 
-        problems = json.load(os.environ.get('PROBLEMS'))
-        changes = json.load(os.environ.get('CONTEXT'))
+        problems = json.loads(os.environ.get('PROBLEMS'))
+        changes = json.loads(os.environ.get('CONTEXT'))
         keys = ['input', 'solutions', 'pdf', 'any']
         prefixes = {}
         for pro in problems:
