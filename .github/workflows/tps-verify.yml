@@ -35,10 +35,17 @@ jobs:
         id: changes
         uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-changes@main
 
+      - name: Env
+        run: |
+          echo "${{ steps.changes.outputs.changes }}"
+          echo "${{ steps.changes.outputs.changes.verify }}"
+          echo "${{ inputs.problems }}"
+
       - name: Filter problems
-        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-changes@main
+        id: run-problems
+        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/run-problems@main
         with:
-          requests: ${{ steps.changes.outputs.changes }}${{ inputs.problems }}
+          requests: ${{ steps.changes.outputs.changes.verify }}${{ inputs.problems }}
 
   verify:
     if: ${{ needs.pre-verify.outputs.problems != '[]' && needs.pre-verify.outputs.problems != '' }}
