@@ -45,7 +45,7 @@ for pro in problems:
         if file.startswith(prefix):
             flags['tests'][pro] = True
             flags['solutions'][pro] = True
-            print('Set tests/{} to true due to {}'.format(pro, file))
+            print('Set tests,solutions/{} to true due to {}'.format(pro, file))
             break
 
     with open('p{}/solutions.json'.format(pro), 'r', encoding='utf8') as f:
