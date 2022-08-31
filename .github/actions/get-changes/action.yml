@@ -1,5 +1,9 @@
 name: "Get changes"
 description: "Get changed files in commits"
+outputs:
+  changes:
+    description: "Commit changes"
+    value: ${{ fromJson(steps.process-changes.outputs.changes) }}
 runs:
   using: "composite"
   steps:
@@ -41,6 +45,7 @@ runs:
         echo "$PROBLEMS"
 
     - name: Process
+      id: process-changes
       shell: python3 {0}
       env:
         CHANGES: ${{ toJSON(steps.changes.outputs) }}
@@ -90,3 +95,11 @@ runs:
               break
 
         print('result', result)
+        print('::set-output name=changes::{}'.format(json.dumps(result)))
+
+    - name: Show env
+      shell: bash
+      env:
+        CHANGES: ${{ steps.process-changes.outputs.changes }}
+      run: |
+        echo "$CHANGES"
