@@ -4,12 +4,16 @@ on:
   workflow_call:
     inputs:
       problems:
-        description: 'Problem labels to build (A-Z), "+" to merge pdfs'
+        description: 'Problem labels to build (A-Z)'
         default: ''
       merge:
         description: 'Merge pdfs?'
         default: false
         type: boolean
+      runs-on:
+        default: 'ubuntu-latest'
+        required: false
+        type: string
 
 jobs:
   pre-build:
@@ -46,7 +50,7 @@ jobs:
   build-pdf:
     needs: [pre-build]
     if: needs.pre-build.outputs.problems != '[]' || (github.event_name == 'workflow_dispatch' && inputs.merge)
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 5
 
     steps:

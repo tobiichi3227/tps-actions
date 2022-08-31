@@ -63,7 +63,7 @@ jobs:
   build-tests:
     needs: [pre-build]
     if: needs.pre-verify.outputs.problems != '[]'
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 15
     strategy:
       matrix:
