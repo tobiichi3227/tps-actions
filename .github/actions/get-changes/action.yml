@@ -33,7 +33,7 @@ runs:
       shell: bash
       env:
         CHANGES: ${{ toJSON(steps.changes.outputs) }}
-        ALLPROBLEMS: ${{ steps.all-problems.outputs }}
+        ALLPROBLEMS: ${{ toJSON(steps.all-problems.outputs) }}
         PROBLEMS: ${{ steps.all-problems.outputs.problems }}
       run: |
         echo "$CHANGES"
