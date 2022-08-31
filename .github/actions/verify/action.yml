@@ -1,0 +1,14 @@
+name: "Verify"
+description: "Verify a problem"
+runs:
+  using: "composite"
+  steps:
+    - name: Verify
+      run: |
+        set +e
+
+        tps verify | tee verify-result.txt
+        grep "ERROR:" verify-result.txt >/dev/null
+        if [ $? -eq 0 ]; then
+          exit 1
+        fi
