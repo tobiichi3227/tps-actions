@@ -45,9 +45,10 @@ runs:
         PROBLEMS: ${{ steps.all-problems.outputs.problems }}
       run: |
         import json
+        import os
 
-        problems = json.load('${{ steps.all-problems.outputs.problems }}')
-        changes = json.load('${{ toJSON(steps.changes.outputs) }}')
+        problems = json.load(os.environ.get('PROBLEMS'))
+        changes = json.load(os.environ.get('CONTEXT'))
         keys = ['input', 'solutions', 'pdf', 'any']
         prefixes = {}
         for pro in problems:
