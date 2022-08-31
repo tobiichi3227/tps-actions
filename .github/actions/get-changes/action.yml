@@ -16,15 +16,15 @@ runs:
             - '*/gen/**'
           solutions:
             - '*/solution/**'
-            - */solutions.json
+            - '*/solutions.json'
           pdf:
-            - */scripts/statement.sh
-            - */statement/*.jpg
-            - */statement/DISABLE_AUTO_BUILD
-            - */statement/index.md
-            - template.tex
+            - '*/scripts/statement.sh'
+            - '*/statement/*.jpg'
+            - '*/statement/DISABLE_AUTO_BUILD'
+            - '*/statement/index.md'
+            - 'template.tex'
           cover:
-            - cover.tex
+            - 'cover.tex'
           any:
             - 'p*/**'
 
