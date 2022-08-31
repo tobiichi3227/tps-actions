@@ -40,13 +40,13 @@ jobs:
         run: |
           echo "${{ steps.changes.outputs.changes }}"
           echo "${{ fromJson(steps.changes.outputs.changes).verify }}"
-          export REQUEST="${{ fromJson(steps.changes.outputs.changes).verify }}"
+          echo "REQUEST=${{ fromJson(steps.changes.outputs.changes).verify }}" >> $GITHUB_ENV
 
       - name: Env 2
         if: github.event_name == 'workflow_dispatch'
         run: |
           echo "${{ inputs.problems }}"
-          export REQUEST="${{ inputs.problems }}"
+          echo "REQUEST=${{ inputs.problems }}" >> $GITHUB_ENV
 
       - name: Env 3
         run: |
@@ -56,7 +56,7 @@ jobs:
         id: run-problems
         uses: TNFSH-Programming-Contest/tps-actions/.github/actions/run-problems@main
         with:
-          requests: ${{ steps.changes.outputs.changes.verify }}${{ inputs.problems }}
+          requests: ${{ env.REQUEST }}
 
   verify:
     if: ${{ needs.pre-verify.outputs.problems != '[]' && needs.pre-verify.outputs.problems != '' }}
