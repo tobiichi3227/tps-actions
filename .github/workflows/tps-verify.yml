@@ -70,7 +70,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         shell: python3 {0}
         env:
-          REQUESTS: ${{ github.event.inputs.problems }}
+          REQUESTS: ${{ inputs.problems }}
           PROBLEMS: ${{ steps.all-problems.outputs.problemsjson }}
         run: |
           import json
