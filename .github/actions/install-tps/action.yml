@@ -4,6 +4,7 @@ runs:
   using: "composite"
   steps:
     - name: Install dependencies and TPS
+      shell: bash
       run: |
         sudo apt-get install dos2unix python3-setuptools
         sudo python3 -m pip install psutil
