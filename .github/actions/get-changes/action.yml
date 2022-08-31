@@ -1,0 +1,36 @@
+name: "Get changes"
+description: "Get changed files in commits"
+runs:
+  using: "composite"
+  steps:
+    # - name: Get problems
+    #   id: all-problems
+    #   uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-problems@main
+
+    - uses: dorny/paths-filter@v2
+      id: changes
+      with:
+        list-files: 'json'
+        filters: |
+          input:
+            - */gen/**
+          solutions:
+            - */solution/**
+            - */solutions.json
+          pdf:
+            - */scripts/statement.sh
+            - */statement/*.jpg
+            - */statement/DISABLE_AUTO_BUILD
+            - */statement/index.md
+            - template.tex
+          cover:
+            - cover.tex
+          any:
+            - p*/**
+
+    - name: Show changes
+      shell: bash
+      env:
+        CONTEXT: ${{ toJSON(steps.changes.outputs.changed_files) }}
+      run: |
+        echo $CONTEXT
