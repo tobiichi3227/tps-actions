@@ -3,7 +3,7 @@ description: "Get changed files in commits"
 outputs:
   changes:
     description: "Commit changes"
-    value: ${{ fromJson(steps.process-changes.outputs.changes) }}
+    value: ${{ steps.process-changes.outputs.changes }}
 runs:
   using: "composite"
   steps:
