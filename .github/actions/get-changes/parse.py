@@ -18,7 +18,7 @@ flags = {
     'pdf': {},
     'verify': {},
 }
-for key in keys:
+for key in flags.keys():
     for pro in problems:
         flags[key][pro] = False
 
