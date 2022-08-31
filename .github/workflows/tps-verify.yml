@@ -81,7 +81,7 @@ jobs:
 
   verify:
     needs: [pre-verify]
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 3
     strategy:
       matrix:

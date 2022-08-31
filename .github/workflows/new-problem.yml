@@ -7,10 +7,14 @@ on:
         description: 'How many problems in this contest?'
         required: true
         type: number
+      runs-on:
+        default: 'ubuntu-latest'
+        required: false
+        type: string
 
 jobs:
   create:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 3
 
     steps:
