@@ -1,0 +1,14 @@
+name: "Get problems"
+description: "Get problem labels from .probelms.json"
+outputs:
+  problems:
+    description: "Problem labels"
+    value: ${{ steps.read-problems.outputs.problems }}
+runs:
+  using: "composite"
+  steps:
+    - name: Read problems
+      id: read-problems
+      run: |
+        problems=$(cat .problems.json)
+        echo "::set-output name=matrix::$problems"
