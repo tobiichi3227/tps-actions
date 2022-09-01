@@ -42,12 +42,6 @@ jobs:
         with:
           requests: ${{ env.REQUEST }}
 
-      - name: Env
-        env:
-          problemsjson: ${{ steps.run-problems.outputs.problemsjson }}
-        run: |
-          echo "$problemsjson"
-
   verify:
     needs: [pre-verify]
     if: needs.pre-verify.outputs.problems != '[]'
