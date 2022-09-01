@@ -9,8 +9,8 @@ on:
         type: string
       merge:
         description: 'Merge pdfs?'
-        default: ''
-        type: string
+        default: false
+        type: boolean
       runs-on:
         default: 'ubuntu-latest'
         type: string
