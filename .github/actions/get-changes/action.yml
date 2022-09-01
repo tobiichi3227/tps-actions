@@ -49,7 +49,7 @@ runs:
 
           git diff ${{ github.event.before }}..HEAD -U0 p${pro}/problem.json | grep '"time_limit"'
           if [ $? -eq 0 ]; then
-            echo "$pro" > $FLAGPATH/solution-${pro}
+            echo "$pro" > $FLAGPATH/solutions-${pro}
           else
             echo "No changes in problem.json for solutions";
           fi
@@ -63,7 +63,7 @@ runs:
 
           git diff ${{ github.event.before }}..HEAD -U0 p${pro}/subtasks.json | grep '"score"'
           if [ $? -eq 0 ]; then
-            echo "$pro" > $FLAGPATH/solution-${pro}
+            echo "$pro" > $FLAGPATH/solutions-${pro}
           else
             echo "No changes in subtasks.json for solutions";
           fi
