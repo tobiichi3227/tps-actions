@@ -31,7 +31,7 @@ for pro in problems:
         print('Skip tests for p{} due to disable flag'.format(pro))
         continue
 
-    # push
+    # paths-filter
     prefix = 'p{}/'.format(pro)
 
     for file in input_files:
@@ -58,16 +58,19 @@ for pro in problems:
                 print('Set tests,output/{0} to true due to p{0}/{1}'.format(pro, file))
             break
 
-    # dispatch
+    # config
     if os.path.exists(os.path.join(flagpath, 'input-{}'.format(pro))):
+        flags['tests'][pro] = True
         flags['input'][pro] = True
-        print('Set input/{} to true due to config'.format(pro))
+        print('Set tests,input/{} to true due to config'.format(pro))
     if os.path.exists(os.path.join(flagpath, 'output-{}'.format(pro))):
+        flags['tests'][pro] = True
         flags['output'][pro] = True
-        print('Set output/{} to true due to config'.format(pro))
+        print('Set tests,output/{} to true due to config'.format(pro))
     if os.path.exists(os.path.join(flagpath, 'solutions-{}'.format(pro))):
+        flags['tests'][pro] = True
         flags['solutions'][pro] = True
-        print('Set solutions/{} to true due to config'.format(pro))
+        print('Set tests,solutions/{} to true due to config'.format(pro))
 
 # pdf
 for pro in problems:
