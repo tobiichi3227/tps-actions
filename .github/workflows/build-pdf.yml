@@ -37,8 +37,10 @@ jobs:
 
       - name: Check push
         if: github.event_name == 'push'
+        env:
+          CHANGES: ${{ steps.changes.outputs.changes }}
         run: |
-          echo "${{ steps.changes.outputs.changes }}"
+          echo "$CHANGES"
           echo "REQUEST=${{ fromJson(steps.changes.outputs.changes).pdf }}" >> $GITHUB_ENV
 
       - name: Check dispatch

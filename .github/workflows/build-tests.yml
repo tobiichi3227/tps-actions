@@ -39,8 +39,10 @@ jobs:
 
       - name: Check push
         if: github.event_name == 'push'
+        env:
+          CHANGES: ${{ steps.changes.outputs.changes }}
         run: |
-          echo "${{ steps.changes.outputs.changes }}"
+          echo "$CHANGES"
           echo "REQUEST=${{ fromJson(steps.changes.outputs.changes).tests }}" >> $GITHUB_ENV
           echo "REQIN=${{ fromJson(steps.changes.outputs.changes).input }}" >> $GITHUB_ENV
           echo "REQOUT=${{ fromJson(steps.changes.outputs.changes).output }}" >> $GITHUB_ENV
