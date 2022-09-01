@@ -9,11 +9,10 @@ on:
         type: string
       merge:
         description: 'Merge pdfs?'
-        default: false
-        type: boolean
+        default: ''
+        type: string
       runs-on:
         default: 'ubuntu-latest'
-        required: false
         type: string
 
 jobs:
@@ -25,6 +24,11 @@ jobs:
       pdf: ${{ steps.run-problems.outputs.problems }}
     steps:
       - uses: actions/checkout@v3
+
+      - name: Dump input context
+        env:
+          INPUT_CONTEXT: ${{ toJSON(input) }}
+        run: echo "$INPUT_CONTEXT"
 
       - name: Get changes
         if: github.event_name == 'push'
