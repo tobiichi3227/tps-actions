@@ -42,7 +42,7 @@ runs:
         FLAGPATH=$RUNNER_TEMP/flags
         mkdir -p $FLAGPATH
 
-        PROBLEMS=${{ steps.all-problems.outputs.problems }}
+        PROBLEMS="${{ steps.all-problems.outputs.problems }}"
 
         for pro in $PROBLEMS; do
           echo "Check $pro"
