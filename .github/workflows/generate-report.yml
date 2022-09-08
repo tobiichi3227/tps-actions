@@ -1,0 +1,38 @@
+name: Generate report
+
+on:
+  workflow_call:
+    inputs:
+      report-path:
+        default: 'report.md'
+        required: false
+        type: string
+      runs-on:
+        default: 'ubuntu-latest'
+        required: false
+        type: string
+
+jobs:
+  list:
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/check-progress@report
+        with:
+          report-path: ${{ inputs.report-path }}
+
+      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/list-subtasks@report
+        with:
+          report-path: ${{ inputs.report-path }}
+
+      - name: Commit files
+        run: |
+          git add "${{ inputs.report-path }}"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git pull
+          git diff-index --quiet HEAD -- || git commit -m "Update subtasks"
+          git push
