@@ -63,10 +63,9 @@ jobs:
       - name: Verify
         working-directory: p${{ matrix.problem }}
         run: |
-          set +e
-
-          tps verify | tee verify-result.txt
-          msg=$(cat verify-result.txt)
+          tps verify > verify-result.txt
+          msg="$(cat verify-result.txt)"
+          msg="${msg//$'\n'/'%0A'}"
           if grep -q "ERROR:" verify-result.txt; then
             echo "::error title=p${{ matrix.problem }}::$msg"
             exit 1
