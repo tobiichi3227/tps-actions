@@ -67,10 +67,10 @@ jobs:
 
           tps verify | tee verify-result.txt
           msg=$(cat verify-result.txt)
-          if grep -q "ERROR:" verify-result.txt then
+          if grep -q "ERROR:" verify-result.txt; then
             echo "::error title=p${{ matrix.problem }}::$msg"
             exit 1
-          elif grep -q "WARNING:" verify-result.txt then
+          elif grep -q "WARNING:" verify-result.txt; then
             echo "::warning title=p${{ matrix.problem }}::$msg"
           else
             echo "::notice title=p${{ matrix.problem }}::$msg"
