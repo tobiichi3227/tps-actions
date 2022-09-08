@@ -20,11 +20,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/check-progress@report
+      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/check-progress@main
         with:
           report-path: ${{ inputs.report-path }}
 
-      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/list-subtasks@report
+      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/list-subtasks@main
         with:
           report-path: ${{ inputs.report-path }}
 
