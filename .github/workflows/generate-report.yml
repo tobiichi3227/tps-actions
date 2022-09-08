@@ -34,5 +34,5 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git pull
-          git diff-index --quiet HEAD -- || git commit -m "Update subtasks"
+          git diff-index --quiet HEAD -- || git commit -m "Generate report"
           git push
