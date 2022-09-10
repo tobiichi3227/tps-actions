@@ -91,6 +91,15 @@ for folder in folders:
             output += ' |'
     output += '\n'
 
+# tests
+output += '| tests |'
+for pro in problems:
+    if os.path.exists('p{}/tests/0-01.in'.format(pro)):
+        output += ' [:white_check_mark:](p{}/tests) |'.format(pro)
+    else:
+        output += ' [:x:](p{}/tests) |'.format(pro)
+output += '\n'
+
 # global_validators
 output += '| subtasks.json<br>global_validators | '
 for pro in problems:
