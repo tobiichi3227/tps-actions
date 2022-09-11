@@ -7,6 +7,10 @@ on:
         default: 'report.md'
         required: false
         type: string
+      group-size:
+        default: 3
+        required: false
+        type: number
       runs-on:
         default: 'ubuntu-latest'
         required: false
@@ -27,6 +31,11 @@ jobs:
       - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/list-subtasks@main
         with:
           report-path: ${{ inputs.report-path }}
+
+      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/list-scores@main
+        with:
+          report-path: ${{ inputs.report-path }}
+          group-size: ${{ inputs.group-size }}
 
       - name: Commit files
         run: |
