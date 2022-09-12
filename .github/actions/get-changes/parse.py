@@ -94,6 +94,10 @@ for pro in problems:
         flags['pdf']['A'] = True
         print('Set pdf/A to true due to cover')
 
+    if os.path.exists(os.path.join(flagpath, 'pdf-{}'.format(pro))):
+        flags['pdf'][pro] = True
+        print('Set pdf/{} to true due to config'.format(pro))
+
 # verify
 verify_files = json.loads(changes['verify_files'])
 for pro in problems:
