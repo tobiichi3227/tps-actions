@@ -8,6 +8,17 @@ with open('.problems.json', 'r', encoding='utf8') as f:
     problems = json.load(f)
 
 output = ''
+
+# cover
+with open('cover.tex', 'r', encoding='utf8') as f:
+    content = f.read()
+if 'TODO' in content:
+    icon = ':x:'
+else:
+    icon = ':white_check_mark:'
+output += '- cover.tex [{}](cover.tex)\n'.format(icon)
+output += '\n'
+
 output += '| |'
 for pro in problems:
     output += ' {} |'.format(pro)
