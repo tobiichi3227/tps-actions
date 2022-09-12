@@ -102,7 +102,7 @@ jobs:
           git push
 
       - name: Build outputs
-        if: contains(needs.pre-build.outputs.output, matrix.problem) & !contains(needs.pre-build.outputs.input, matrix.problem)
+        if: contains(needs.pre-build.outputs.output, matrix.problem) && !contains(needs.pre-build.outputs.input, matrix.problem)
         working-directory: p${{ matrix.problem }}
         run: |
           echo "Building output for ${{ matrix.problem }}"
