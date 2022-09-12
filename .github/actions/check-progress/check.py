@@ -107,13 +107,17 @@ output += '\n'
 output += '| tests |'
 for pro in problems:
     if os.path.exists('p{}/tests/0-01.in'.format(pro)):
-        output += ' [:white_check_mark:](p{}/tests) |'.format(pro)
+        icon = ':white_check_mark:'
     else:
-        output += ' [:x:](p{}/tests) |'.format(pro)
+        icon = ':x:'
+    auto = ''
+    if os.path.exists('p{}/gen/DISABLE_AUTO_BUILD'.format(pro)):
+        auto = '<br>[Auto build disabled](p{}/gen/DISABLE_AUTO_BUILD)'.format(pro)
+    output += ' [{}](p{}/tests){} |'.format(icon, pro, auto)
 output += '\n'
 
 # statement
-output += '| statement |'
+output += '| statement/index.md |'
 for pro in problems:
     with open('p{}/statement/index.md'.format(pro), 'r', encoding='utf8') as f:
         content = f.read()
@@ -123,6 +127,18 @@ for pro in problems:
     else:
         icon = ':white_check_mark:'
     output += ' [{}](p{}/statement/index.md) |'.format(icon, pro)
+output += '\n'
+
+output += '| statement/index.pdf |'
+for pro in problems:
+    if os.path.exists('p{}/statement/index.pdf'.format(pro)):
+        icon = ':white_check_mark:'
+    else:
+        icon = ':x:'
+    auto = ''
+    if os.path.exists('p{}/statement/DISABLE_AUTO_BUILD'.format(pro)):
+        auto = '<br>[Auto build disabled](p{}/statement/DISABLE_AUTO_BUILD)'.format(pro)
+    output += ' [{}](p{}/statement/index.pdf){} |'.format(icon, pro, auto)
 output += '\n'
 
 reportpath = os.environ.get('REPORTPATH')
