@@ -14,3 +14,4 @@ for pro in problems:
 print('result:', result)
 print('::set-output name=problemsjson::{}'.format(json.dumps(result)))
 print('::set-output name=problems::{}'.format(' '.join(result)))
+print('::set-output name=lastproblem::{}'.format(problems[-1]))

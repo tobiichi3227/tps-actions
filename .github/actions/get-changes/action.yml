@@ -30,6 +30,8 @@ runs:
             - 'template.tex'
           cover:
             - 'cover.tex'
+          appendix:
+            - 'appendix.tex'
           verify:
             - 'p*/**'
 

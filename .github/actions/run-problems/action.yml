@@ -8,6 +8,8 @@ outputs:
     value: ${{ steps.run-problems.outputs.problems }}
   problemsjson:
     value: ${{ steps.run-problems.outputs.problemsjson }}
+  lastproblem:
+    value: ${{ steps.run-problems.outputs.lastproblem }}
 runs:
   using: "composite"
   steps:
