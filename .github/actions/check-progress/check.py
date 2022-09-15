@@ -10,13 +10,25 @@ with open('.problems.json', 'r', encoding='utf8') as f:
 output = ''
 
 # cover
-with open('cover.tex', 'r', encoding='utf8') as f:
-    content = f.read()
-if 'TODO' in content:
-    icon = ':x:'
-else:
-    icon = ':white_check_mark:'
-output += '- cover.tex [{}](cover.tex)\n'.format(icon)
+if os.path.exists('cover.tex'):
+    with open('cover.tex', 'r', encoding='utf8') as f:
+        content = f.read()
+    if 'TODO' in content:
+        icon = ':x:'
+    else:
+        icon = ':white_check_mark:'
+    output += '- cover.tex [{}](cover.tex)\n'.format(icon)
+
+# appendix
+if os.path.exists('appendix.tex'):
+    with open('appendix.tex', 'r', encoding='utf8') as f:
+        content = f.read()
+    if 'TODO' in content:
+        icon = ':x:'
+    else:
+        icon = ':white_check_mark:'
+    output += '- appendix.tex [{}](appendix.tex)\n'.format(icon)
+
 output += '\n'
 
 output += '| |'
@@ -151,6 +163,8 @@ for pro in problems:
         auto = '<br>[Auto build disabled](p{}/statement/DISABLE_AUTO_BUILD)'.format(pro)
     output += ' [{}](p{}/statement/index.pdf){} |'.format(icon, pro, auto)
 output += '\n'
+
+output = output.lstrip()
 
 reportpath = os.environ.get('REPORTPATH')
 
