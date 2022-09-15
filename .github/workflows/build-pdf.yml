@@ -89,6 +89,12 @@ jobs:
 
           sudo apt-get install poppler-utils
 
+          rm -f NotoSansCJK-Bold.ttc.zip
+          rm -rf NotoSansCJK-Bold/
+          rm -f NotoSansCJK-Regular.ttc.zip
+          rm -rf NotoSansCJK-Regular/
+          rm -f pandoc-2.10.1-1-amd64.deb
+
       - name: Check environment
         working-directory: pA
         run: |
