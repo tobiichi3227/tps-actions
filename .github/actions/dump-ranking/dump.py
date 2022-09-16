@@ -119,8 +119,8 @@ try:
     os.mkdir('sublist')
 except:
     pass
-# for u in users:
-#     dumpdata(os.path.join('sublist', u))
+for u in users:
+    dumpdata(os.path.join('sublist', u))
 
 subchanges = dumpdata_dir('subchanges')
 if subchanges is None:
