@@ -1,0 +1,15 @@
+name: New problem
+inputs:
+  problem-count:
+    required: true
+    default: 3
+runs:
+  using: "composite"
+  steps:
+    - name: Process
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      env:
+        PROBLEMCOUNT: ${{ inputs.problem-count }}
+      run: |
+        python3 create.py

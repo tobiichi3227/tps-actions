@@ -55,6 +55,6 @@ except ValueError:
     idx1 = text.index(flag1)
     idx2 = text.index(flag2)
 
-text = text[:idx1] + flag1 + '\n' + output + text[idx2:]
+text = text[:idx1] + flag1 + '\n\n' + output + '\n' + text[idx2:]
 with open(reportpath, 'w', encoding='utf8') as f:
     f.write(text)
