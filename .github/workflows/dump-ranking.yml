@@ -1,0 +1,40 @@
+name: Dump ranking
+
+on:
+  workflow_call:
+    inputs:
+      url:
+        required: true
+        type: string
+      target:
+        default: 'ranking'
+        required: false
+        type: string
+      runs-on:
+        default: 'ubuntu-latest'
+        required: false
+        type: string
+
+jobs:
+  dump:
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/dump-ranking@main
+        with:
+          url: ${{ inputs.url }}
+          target: ${{ inputs.target }}
+
+      - name: Commit files
+        run: |
+          git add "${{ inputs.target }}"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git pull
+          git diff-index --quiet HEAD -- || git commit -m "Dump ranking
+
+          Co-Authored-By: ${{ github.event.sender.login }} <${{ github.event.sender.id }}+${{ github.event.sender.login }}@users.noreply.github.com>"
+          git push

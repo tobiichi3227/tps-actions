@@ -1,0 +1,21 @@
+name: Dump ranking
+inputs:
+  url:
+    description: 'URL to ranking'
+    required: true
+  target:
+    description: 'Target folder'
+    required: false
+    default: 'ranking'
+runs:
+  using: "composite"
+  steps:
+    - name: Process
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      env:
+        RANKINGURL: ${{ inputs.url }}
+        TARGETPATH: ${{ inputs.target }}
+      run: |
+        rm -rf $TARGETPATH
+        python3 dump.py
