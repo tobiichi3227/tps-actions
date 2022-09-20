@@ -15,18 +15,17 @@ for pro in problems:
     print('Enter p{}/statement'.format(pro))
     os.chdir('p{}/statement'.format(pro))
 
-    idx = 1
+    idx = 0
     content = open('index.md', 'r', encoding='utf8').read()
 
     pngs = glob.glob('*.png')
     jpgs = glob.glob('*.jpg')
 
     for source in pngs:
-        while True:
-            target = 'img{}.jpg'.format(idx if idx > 1 else '')
-            if not os.path.exists(target):
-                break
+        target = os.path.splitext(source)[0] + '.jpg'
+        while os.path.exists(target):
             idx += 1
+            target = 'img{}.jpg'.format(idx if idx > 1 else '')
         new_content = re.sub(r'{\s*' + re.escape(source) + r'\s*}', '{' + target + '}', content)
         if content != new_content:
             content = new_content
