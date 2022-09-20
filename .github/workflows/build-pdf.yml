@@ -89,6 +89,8 @@ jobs:
 
           sudo apt-get install poppler-utils
 
+          sudo python3 -m pip install pillow
+
           rm -f NotoSansCJK-Bold.ttc.zip
           rm -rf NotoSansCJK-Bold/
           rm -f NotoSansCJK-Regular.ttc.zip
@@ -109,6 +111,20 @@ jobs:
           fc-list | grep "Noto Sans Mono CJK TC" || :;
           echo ""
           pdfunite -v
+
+      - name: Setup git
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/convert-images@main
+
+      - name: Commit images
+        run: |
+          git status
+          git pull
+          git diff-index --quiet HEAD -- || git commit -m "Compress images"
+          git push
 
       - name: Build pdfs
         run: |
@@ -151,8 +167,6 @@ jobs:
       - name: Commit pdf
         run: |
           git status
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
           git pull
           git diff-index --quiet HEAD -- || git commit -m "Build pdfs"
           git push

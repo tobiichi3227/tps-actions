@@ -24,6 +24,7 @@ runs:
           pdf:
             - '*/scripts/statement.sh'
             - '*/statement/*.jpg'
+            - '*/statement/*.png'
             - '*/statement/DISABLE_AUTO_BUILD'
             - '*/statement/index.md'
           template:
