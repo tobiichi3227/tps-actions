@@ -19,6 +19,10 @@ on:
         default: 'ubuntu-latest'
         required: false
         type: string
+      timeout-minutes:
+        default: 15
+        required: false
+        type: number
 
 jobs:
   pre-build:
@@ -66,7 +70,7 @@ jobs:
     needs: [pre-build]
     if: needs.pre-build.outputs.problems != '[]'
     runs-on: ${{ inputs.runs-on }}
-    timeout-minutes: 15
+    timeout-minutes: ${{ inputs.timeout-minutes }}
     strategy:
       matrix:
         problem: ${{ fromJson(needs.pre-build.outputs.problems) }}
