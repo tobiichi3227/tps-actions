@@ -18,6 +18,7 @@ runs:
         filters: |
           input:
             - '*/gen/**'
+            - '*/validator/**'
           solutions:
             - '*/solution/**'
             - '*/solutions.json'
@@ -50,18 +51,25 @@ runs:
         for pro in $PROBLEMS; do
           echo "Check $pro"
 
-          git diff ${{ github.event.before }}..HEAD -U0 p${pro}/problem.json | grep '"time_limit"'
-          if [ $? -eq 0 ]; then
-            echo "$pro" > $FLAGPATH/solutions-${pro}
-          else
-            echo "No changes in problem.json for solutions";
-          fi
-
           git diff ${{ github.event.before }}..HEAD -U0 p${pro}/solutions.json | grep '"model_solution"'
           if [ $? -eq 0 ]; then
             echo "$pro" > $FLAGPATH/input-${pro}
           else
             echo "No changes in solutions.json for input";
+          fi
+
+          git diff ${{ github.event.before }}..HEAD -U0 p${pro}/subtasks.json | grep '\.cpp'
+          if [ $? -eq 0 ]; then
+            echo "$pro" > $FLAGPATH/input-${pro}
+          else
+            echo "No changes in solutions.json for input";
+          fi
+
+          git diff ${{ github.event.before }}..HEAD -U0 p${pro}/problem.json | grep '"time_limit"'
+          if [ $? -eq 0 ]; then
+            echo "$pro" > $FLAGPATH/solutions-${pro}
+          else
+            echo "No changes in problem.json for solutions";
           fi
 
           git diff ${{ github.event.before }}..HEAD -U0 p${pro}/subtasks.json | grep '"score"'
