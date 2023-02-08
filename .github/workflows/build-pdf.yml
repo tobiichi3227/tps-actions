@@ -74,7 +74,7 @@ jobs:
           wget https://github.com/jgm/pandoc/releases/download/2.10.1/pandoc-2.10.1-1-amd64.deb
           sudo dpkg -i pandoc-2.10.1-1-amd64.deb
 
-          sudo apt-get install texlive-xetex
+          sudo apt-get install texlive-xetex texlive-lang-chinese
 
           sudo mkdir -p /usr/share/fonts/opentype/noto
           wget -nv https://noto-website-2.storage.googleapis.com/pkgs/NotoSansCJK-Regular.ttc.zip
