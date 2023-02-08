@@ -15,6 +15,6 @@ runs:
       shell: bash
       run: |
         export PROBLEMSJSON=$(cat .problems.json)
-        echo "::set-output name=problemsjson::$PROBLEMSJSON"
+        echo "problemsjson=$PROBLEMSJSON" >> $GITHUB_OUTPUT
         PROBLEMS=$(python3 -c 'import json, os; print(" ".join(json.loads(os.environ.get("PROBLEMSJSON"))))')
-        echo "::set-output name=problems::$PROBLEMS"
+        echo "problems=$PROBLEMS" >> $GITHUB_OUTPUT
