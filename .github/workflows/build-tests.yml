@@ -28,7 +28,7 @@ jobs:
   pre-build:
     runs-on: ${{ inputs.runs-on }}
     container:
-      image: localhost/tps-github-runner:latest
+      image: tps-github-runner:latest
       options: --user runner --pull=never
     timeout-minutes: 3
     outputs:
@@ -74,7 +74,7 @@ jobs:
     if: needs.pre-build.outputs.problems != '[]'
     runs-on: ${{ inputs.runs-on }}
     container:
-      image: localhost/tps-github-runner:latest
+      image: tps-github-runner:latest
       options: --user runner --pull=never
     timeout-minutes: ${{ inputs.timeout-minutes }}
     strategy:
