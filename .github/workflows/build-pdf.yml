@@ -104,6 +104,9 @@ jobs:
       #     rm -rf NotoSansCJK-Regular/
       #     rm -f pandoc-2.10.1-1-amd64.deb
 
+      - name: Install lsb_release
+        run: sudo apt-get install -y lsb_release
+
       - name: Check environment
         working-directory: pA
         run: |
