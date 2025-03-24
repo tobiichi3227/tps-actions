@@ -29,7 +29,7 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     container:
       image: tps-github-runner:latest
-      options: --user runner
+      options: --user sudo
     timeout-minutes: 3
     outputs:
       problems: ${{ steps.run-problems.outputs.problemsjson }}
