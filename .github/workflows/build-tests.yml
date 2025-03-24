@@ -28,7 +28,7 @@ jobs:
   pre-build:
     runs-on: ${{ inputs.runs-on }}
     container:
-      image: tobiichi32227/tps-github-runner:latest
+      image: tobiichi3227/tps-github-runner:latest
       options: --user runner
     timeout-minutes: 3
     outputs:
