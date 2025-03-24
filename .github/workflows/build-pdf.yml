@@ -68,7 +68,10 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - run: whoami
+      - run: |
+          whoami
+          ls -all /__w
+          ls -all /
       - uses: actions/checkout@v4
 
       # - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/install-tps@main
