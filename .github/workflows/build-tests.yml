@@ -28,8 +28,8 @@ jobs:
   pre-build:
     runs-on: ${{ inputs.runs-on }}
     container:
-      image: tps-github-runner:latest
-      options: --user runner --pull=never
+      image: tobiichi32227/tps-github-runner:latest
+      options: --user runner
     timeout-minutes: 3
     outputs:
       problems: ${{ steps.run-problems.outputs.problemsjson }}
@@ -74,8 +74,8 @@ jobs:
     if: needs.pre-build.outputs.problems != '[]'
     runs-on: ${{ inputs.runs-on }}
     container:
-      image: tps-github-runner:latest
-      options: --user runner --pull=never
+      image: tobiichi3227/tps-github-runner:latest
+      options: --user runner
     timeout-minutes: ${{ inputs.timeout-minutes }}
     strategy:
       matrix:
