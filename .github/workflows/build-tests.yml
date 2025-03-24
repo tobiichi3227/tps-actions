@@ -73,6 +73,9 @@ jobs:
     needs: [pre-build]
     if: needs.pre-build.outputs.problems != '[]'
     runs-on: ${{ inputs.runs-on }}
+    container:
+      image: tps-github-runner:latest
+      options: --user sudo
     timeout-minutes: ${{ inputs.timeout-minutes }}
     strategy:
       matrix:
@@ -82,8 +85,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/install-tps@main
-        if: ${{ runner.name == 'Hosted Agent' || startsWith(runner.name, 'GitHub Actions') || startsWith(runner.name, 'GitHub-Actions') }}
+      # - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/install-tps@main
+        # if: ${{ runner.name == 'Hosted Agent' || startsWith(runner.name, 'GitHub Actions') || startsWith(runner.name, 'GitHub-Actions') }}
 
       - name: Setup git
         run: |
