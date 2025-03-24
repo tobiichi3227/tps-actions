@@ -69,7 +69,6 @@ jobs:
 
     steps:
       - run: whoami
-      - run: sudo chown -R runner /__w
       - uses: actions/checkout@v4
 
       # - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/install-tps@main
