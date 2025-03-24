@@ -68,6 +68,7 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - run: whoami
       - run: sudo chown -R runner /__w
       - uses: actions/checkout@v4
 
