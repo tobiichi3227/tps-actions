@@ -20,14 +20,14 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     container:
       image: tobiichi3227/tps-github-runner:latest
-      options: --user runner
+      options: --user root
     timeout-minutes: 3
     outputs:
       problems: ${{ steps.run-problems.outputs.problemsjson }}
       pdf: ${{ steps.run-problems.outputs.problems }}
       lastproblem: ${{ steps.run-problems.outputs.lastproblem }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Dump input context
         env:
