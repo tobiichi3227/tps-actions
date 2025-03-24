@@ -64,7 +64,7 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     container:
       image: tobiichi3227/tps-build-pdf-github-runner:latest
-      options: --user runner
+      options: --user root
     timeout-minutes: 5
 
     steps:
