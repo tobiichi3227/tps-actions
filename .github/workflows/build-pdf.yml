@@ -122,6 +122,11 @@ jobs:
           echo ""
           pdfunite -v
 
+      - name: Refresh font cache
+        run: |
+          sudo fc-cache -fv
+          fc-cache -fv
+
       - name: Setup git
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
