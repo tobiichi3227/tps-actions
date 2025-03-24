@@ -27,6 +27,10 @@ jobs:
       pdf: ${{ steps.run-problems.outputs.problems }}
       lastproblem: ${{ steps.run-problems.outputs.lastproblem }}
     steps:
+      - run: |
+          whoami
+          ls -all /__w
+          ls -all /
       - uses: actions/checkout@v4
 
       - name: Dump input context
