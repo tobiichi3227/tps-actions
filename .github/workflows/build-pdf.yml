@@ -64,11 +64,11 @@ jobs:
     runs-on: ${{ inputs.runs-on }}
     container:
       image: tobiichi3227/tps-build-pdf-github-runner:latest
-      options: --user root
+      options: --user runner
     timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/install-tps@main
         # if: ${{ runner.name == 'Hosted Agent' || startsWith(runner.name, 'GitHub Actions') || startsWith(runner.name, 'GitHub-Actions') }}
