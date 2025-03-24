@@ -27,10 +27,6 @@ jobs:
       pdf: ${{ steps.run-problems.outputs.problems }}
       lastproblem: ${{ steps.run-problems.outputs.lastproblem }}
     steps:
-      - run: |
-          whoami
-          ls -all /__w
-          ls -all /
       - uses: actions/checkout@v4
 
       - name: Dump input context
@@ -72,10 +68,6 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - run: |
-          whoami
-          ls -all /__w
-          ls -all /
       - uses: actions/checkout@v4
 
       # - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/install-tps@main
