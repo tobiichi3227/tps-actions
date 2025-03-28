@@ -88,7 +88,7 @@ jobs:
           ls -al /usr/share/fonts/opentype/noto
           sudo fc-cache -f -v
 
-          sudo apt-get install poppler-utils
+          sudo apt-get install poppler-utils imagemagick
 
           sudo python3 -m pip install pillow
 
