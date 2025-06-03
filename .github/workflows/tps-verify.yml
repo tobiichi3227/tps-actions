@@ -14,11 +14,17 @@ on:
 jobs:
   pre-verify:
     runs-on: ${{ inputs.runs-on }}
+    container:
+      image: tobiichi3227/tps-github-runner
+      options: --user root
     timeout-minutes: 3
     outputs:
       problems: ${{ steps.run-problems.outputs.problemsjson }}
     steps:
       - uses: actions/checkout@v3
+
+      - name: Allow Git to access workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Get changes
         if: github.event_name == 'push'
@@ -48,6 +54,9 @@ jobs:
     needs: [pre-verify]
     if: needs.pre-verify.outputs.problems != '[]'
     runs-on: ${{ inputs.runs-on }}
+    container:
+      image: tobiichi3227/tps-github-runner
+      options: --user root
     timeout-minutes: 3
     strategy:
       matrix:
@@ -57,11 +66,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: TNFSH-Programming-Contest/tps-actions/.github/actions/install-tps@main
-        if: ${{ runner.name == 'Hosted Agent' || startsWith(runner.name, 'GitHub Actions') || startsWith(runner.name, 'Github-Actions') }}
+      - name: Allow Git to access workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Verify
         working-directory: p${{ matrix.problem }}
+        shell: bash
         run: |
           tps verify > verify-result.txt
           msg="$(cat verify-result.txt)"
