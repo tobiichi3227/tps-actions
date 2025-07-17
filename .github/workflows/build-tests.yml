@@ -45,7 +45,7 @@ jobs:
       - name: Get changes
         if: github.event_name == 'push'
         id: changes
-        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/get-changes@main
+        uses: tobiichi3227/tps-actions/.github/actions/get-changes@main
 
       - name: Check push
         if: github.event_name == 'push'
