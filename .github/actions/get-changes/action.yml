@@ -44,6 +44,7 @@ runs:
         set +e
 
         FLAGPATH=$RUNNER_TEMP/flags
+        rm -rf $FLAGPATH
         mkdir -p $FLAGPATH
 
         PROBLEMS="${{ steps.all-problems.outputs.problems }}"
