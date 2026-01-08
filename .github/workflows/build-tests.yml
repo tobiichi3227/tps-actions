@@ -36,6 +36,7 @@ jobs:
       input: ${{ env.REQIN }}
       output: ${{ env.REQOUT }}
       solutions: ${{ env.REQSOL }}
+      solfile-changes: ${{ steps.changes.outputs.solfile-changes }}
     steps:
       - uses: actions/checkout@v3
 
@@ -45,7 +46,11 @@ jobs:
       - name: Get changes
         if: github.event_name == 'push'
         id: changes
-        uses: tobiichi3227/tps-actions/.github/actions/get-changes@main
+        uses: tobiichi3227/tps-actions/.github/actions/get-changes@dev
+
+      - name: Set solfile-changes default
+        if: github.event_name != 'push'
+        run: echo "SOLFILE_CHANGES={}" >> $GITHUB_ENV
 
       - name: Check push
         if: github.event_name == 'push'
@@ -163,12 +168,133 @@ jobs:
       - name: Run solutions
         if: contains(needs.pre-build.outputs.solutions, matrix.problem) || steps.tests-changes.outputs.changed == 'true'
         working-directory: p${{ matrix.problem }}
+        shell: bash
         run: |
           echo "Run solutions for ${{ matrix.problem }}"
-          rm -f solutions-check.txt
-          tps solutions | tee -a solutions-check.txt
+
+          sol_check=solutions-check.txt
+          tests_changed="${{ steps.tests-changes.outputs.changed }}"
+          solfile_changes='${{ needs.pre-build.outputs.solfile-changes }}'
+
+          # Check if solutions.json changed for this problem
+          need_full_run="false"
+          if echo "$solfile_changes" | jq -r '."${{ matrix.problem }}" // [] | .[]' | grep -q "solutions.json"; then
+            need_full_run="true"
+          fi
+
+          # Step 1: Check if full run needed
+          if [ "$tests_changed" = "true" ] || [ ! -f "$sol_check" ] || [ "$need_full_run" = "true" ]; then
+            echo "Full solution run mode (tests changed or no existing $sol_check or solutions.json changed)"
+            tps solutions | tee "$sol_check"
+            git status
+            git add "$sol_check"
+            git pull
+            git diff --cached --quiet || git commit -m "p${{ matrix.problem }} Run solutions"
+            git push
+            exit 0
+          fi
+
+          # Incremental mode: use Python for steps 2-5
+          python3 << 'PYTHON_EOF'
+          import json
+          import subprocess
+          import sys
+          import os
+
+          sol_check = "solutions-check.txt"
+          solfile_changes_str = '${{ needs.pre-build.outputs.solfile-changes }}'
+          END_STRING = "Finished."
+
+          # Load solutions.json
+          with open("solutions.json", "r") as f:
+              solutions_json = json.load(f)
+
+          # Load solfile-changes
+          solfile_changes = json.loads(solfile_changes_str)
+          problem = "${{ matrix.problem }}"
+          changed_files = [f.replace("solution/", "") for f in solfile_changes.get(problem, [])]
+
+          # Filter by solutions.json existence
+          valid_changed_files = [f for f in changed_files if f in solutions_json]
+
+          if not valid_changed_files:
+              print("No valid solution files changed; nothing to do")
+              sys.exit(0)
+
+          print(f"Changed solution files: {valid_changed_files}")
+
+          # Step 2: Parse existing solutions-check.txt
+          blocks = {}  # {sol_name: block_content}
+          order = []    # [sol_name, sol_name, ...]
+
+          with open(sol_check, "r") as f:
+              lines = f.readlines()
+
+          current_block = []
+          current_sol = None
+
+          for line in lines:
+              line = line.rstrip("\n")
+
+              if line.strip() == END_STRING:
+                  # End current block
+                  if current_sol and current_block:
+                      current_block.append(line)
+                      blocks[current_sol] = "\n".join(current_block)
+                      order.append(current_sol)
+                  current_block = []
+                  current_sol = None
+              elif current_sol is None and line.strip():
+                  # Start new block with solution name
+                  current_sol = line.strip()
+                  current_block = [line]
+              elif current_sol is not None:
+                  # Continue appending to current block
+                  current_block.append(line)
+
+          # Handle last block if not ended with Finished.
+          if current_sol and current_block:
+              blocks[current_sol] = "\n".join(current_block)
+              order.append(current_sol)
+
+          print(f"Existing solutions in order: {order}")
+
+          # Step 3: Process changes
+          # Remove solutions that no longer exist or are in changed_files
+          for sol_name in list(blocks.keys()):
+              if sol_name not in order:
+                  continue
+              if sol_name in valid_changed_files:
+                  print(f"Will update: {sol_name}")
+              else:
+                  if not os.path.exists(f"solution/{sol_name}"):
+                      print(f"Dropped (missing file): {sol_name}")
+                      del blocks[sol_name]
+
+          # Step 4: Run changed solutions
+          for sol in valid_changed_files:
+              print(f"Running tps invoke for {sol}")
+              result = subprocess.run(["tps", "invoke", f"solution/{sol}", "-r"],
+                                    capture_output=True, text=True)
+              out = result.stdout + result.stderr
+              blocks[sol] = f"{sol}\n{out.strip()}"
+
+          # Step 5: Build new solutions-check.txt in solutions.json order
+          new_content = []
+          for sol_name in solutions_json.keys():
+              if sol_name in blocks:
+                  new_content.append(blocks[sol_name])
+                  new_content.append("")
+
+          # Write back
+          with open(sol_check, "w") as f:
+              f.write("\n".join(new_content))
+
+          print(f"Updated {sol_check}")
+          PYTHON_EOF
+
           git status
-          git add solutions-check.txt
+          git add "$sol_check"
           git pull
-          git diff --cached --quiet || git commit -m "p${{ matrix.problem }} Run solutions"
-          git push
+          git diff --cached --quiet || git commit -m "p${{ matrix.problem }} Run solutions (incremental)"
+          git push || true

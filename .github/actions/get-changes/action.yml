@@ -4,6 +4,9 @@ outputs:
   changes:
     description: "Commit changes"
     value: ${{ steps.process-changes.outputs.changes }}
+  solfile-changes:
+    description: "Solution file changes (dict of list: {problemLabel: [solution/path1, solution/path2, ...]})"
+    value: ${{ steps.process-changes.outputs.solfile-changes }}
 runs:
   using: "composite"
   steps:

@@ -1,3 +1,4 @@
+import collections
 import json
 import os
 
@@ -19,6 +20,7 @@ flags = {
     'pdf': {},
     'verify': {},
 }
+solfiles = collections.defaultdict(list)
 for key in flags.keys():
     for pro in problems:
         flags[key][pro] = False
@@ -45,8 +47,8 @@ for pro in problems:
         if file.startswith(prefix):
             flags['tests'][pro] = True
             flags['solutions'][pro] = True
+            solfiles[pro].append(file.removeprefix(prefix))
             print('Set tests,solutions/{} to true due to {}'.format(pro, file))
-            break
 
     with open('p{}/solutions.json'.format(pro), 'r', encoding='utf8') as f:
         solutions = json.load(f)
@@ -121,5 +123,7 @@ for key in flags:
 
 print('flags:', flags)
 print('result:', result)
+print('solfiles:', dict(solfiles))
 with open(os.environ.get('GITHUB_OUTPUT', ''), 'a') as f:
     f.write('\nchanges={}'.format(json.dumps(result)))
+    f.write('\nsolfile-changes={}'.format(json.dumps(solfiles)))
