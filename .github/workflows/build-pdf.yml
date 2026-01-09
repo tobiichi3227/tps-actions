@@ -12,6 +12,7 @@ on:
         default: false
         type: boolean
       runs-on:
+        description: 'Runner type'
         default: 'ubuntu-latest'
         type: string
 
@@ -26,6 +27,7 @@ on:
         default: false
         type: boolean
       runs-on:
+        description: 'Runner type'
         default: 'ubuntu-latest'
         type: string
 
