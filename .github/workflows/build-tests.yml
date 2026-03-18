@@ -182,6 +182,10 @@ jobs:
             need_full_run="true"
           fi
 
+          if [ "${{ github.event_name }}" = "push" ]; then
+            need_full_run="true"
+          fi
+
           # Step 1: Check if full run needed
           if [ "$tests_changed" = "true" ] || [ ! -f "$sol_check" ] || [ "$need_full_run" = "true" ]; then
             echo "Full solution run mode (tests changed or no existing $sol_check or solutions.json changed)"
