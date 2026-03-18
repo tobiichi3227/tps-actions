@@ -160,8 +160,7 @@ jobs:
                   "ref": "${{ github.ref }}",
                   "inputs": {
                     "problems": "${{ needs.pre-build.outputs.input }}",
-                    "merge": "true",
-                    "runs-on": "${{ inputs.runs-on }}"
+                    "merge": "true"
                   }
                 }' \
             https://api.github.com/repos/${{ github.repository }}/actions/workflows/build-pdf.yml/dispatches
