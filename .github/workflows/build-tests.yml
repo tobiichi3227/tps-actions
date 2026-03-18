@@ -182,7 +182,7 @@ jobs:
             need_full_run="true"
           fi
 
-          if [ "${{ github.event_name }}" = "push" ]; then
+          if [ "${{ github.event_name }}" != "push" ]; then
             need_full_run="true"
           fi
 
