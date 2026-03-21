@@ -140,8 +140,12 @@ jobs:
 
           git diff ${{ github.sha }}..HEAD --quiet p${{ matrix.problem }}/tests/*.in p${{ matrix.problem }}/tests/*.out
           if [ $? -ne 0 ]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "Tests changed"
+            if [ -f "p${{ matrix.problem }}/statement/DISABLE_AUTO_BUILD" ]; then
+              echo "Skip pdf for p${{ matrix.problem }} due to disable flag"
+            else
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "p${{ matrix.problem }} tests changed"
+            fi
           else
             echo "No changes in tests";
           fi
