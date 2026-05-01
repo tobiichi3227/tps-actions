@@ -92,6 +92,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: Allow Git to access workspace
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -180,12 +182,7 @@ jobs:
           tests_changed="${{ steps.tests-changes.outputs.changed }}"
           solfile_changes='${{ needs.pre-build.outputs.solfile-changes }}'
 
-          # Check if solutions.json changed for this problem
           need_full_run="false"
-          if echo "$solfile_changes" | jq -r '."${{ matrix.problem }}" // [] | .[]' | grep -q "solutions.json"; then
-            need_full_run="true"
-          fi
-
           if [ "${{ github.event_name }}" != "push" ]; then
             need_full_run="true"
           fi
@@ -202,6 +199,8 @@ jobs:
             exit 0
           fi
 
+          git show HEAD^:"p${{ matrix.problem }}/solutions.json" > old-solutions.json
+
           # Incremental mode: use Python for steps 2-5
           python3 << 'PYTHON_EOF'
           import json
@@ -213,9 +212,11 @@ jobs:
           solfile_changes_str = '${{ needs.pre-build.outputs.solfile-changes }}'
           END_STRING = "Finished."
 
-          # Load solutions.json
           with open("solutions.json", "r") as f:
               solutions_json = json.load(f)
+
+          with open("old-solutions.json", "r") as f:
+              old_solutions_json = json.load(f)
 
           # Load solfile-changes
           solfile_changes = json.loads(solfile_changes_str)
@@ -223,7 +224,17 @@ jobs:
           changed_files = [f.replace("solution/", "") for f in solfile_changes.get(problem, [])]
 
           # Filter by solutions.json existence
-          valid_changed_files = [f for f in changed_files if f in solutions_json]
+          valid_changed_files = {f for f in changed_files if f in solutions_json}
+
+          # Add verdict changed solution file
+          for old_filename, old_config in old_solutions_json.items():
+            if old_filename not in solutions_json:
+                # deleted file
+                continue
+
+            cur_config = solutions_json[old_filename]
+            if cur_config != old_config:
+                valid_changed_files.add(old_filename)
 
           if not valid_changed_files:
               print("No valid solution files changed; nothing to do")
@@ -271,7 +282,9 @@ jobs:
           # Remove solutions that no longer exist or are in changed_files
           for sol_name in list(blocks.keys()):
               if sol_name not in order:
+                  print(f"New solution: {sol_name}")
                   continue
+
               if sol_name in valid_changed_files:
                   print(f"Will update: {sol_name}")
               else:
@@ -300,6 +313,8 @@ jobs:
 
           print(f"Updated {sol_check}")
           PYTHON_EOF
+
+          rm old-solutions.json
 
           git status
           git add "$sol_check"
