@@ -114,16 +114,36 @@ for folder in folders:
             output += ' |'
     output += '\n'
 
-# global_validators
-output += '| subtasks.json<br>global_validators | '
+# global_validators / subtask_sensitive_validators
+output += '| subtasks.json<br>global_validators / subtask_sensitive_validators | '
 for pro in problems:
-    if len(subtasksjson[pro]['global_validators']) == 0:
+    global_validators = subtasksjson[pro].get('global_validators', [])
+    subtask_sensitive_validators = subtasksjson[pro].get(
+        'subtask_sensitive_validators', []
+    )
+
+    warnings = []
+
+    if (len(global_validators) == 0 and
+            len(subtask_sensitive_validators) == 0):
+        warnings.append('Not set')
+
+    if (len(subtask_sensitive_validators) > 0 and
+            not all('{subtask}' in v
+                    for v in subtask_sensitive_validators)):
+        warnings.append(
+            'subtask_sensitive_validators needs `{subtask}` argument'
+        )
+
+    if warnings:
         icon = ':warning:'
-        text = ' Not set'
+        text = ' ' + ', '.join(warnings)
     else:
         icon = ':white_check_mark:'
         text = ''
+
     output += ' [{}](p{}/subtasks.json){} |'.format(icon, pro, text)
+
 output += '\n'
 
 # tests
