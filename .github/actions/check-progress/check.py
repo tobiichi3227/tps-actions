@@ -95,6 +95,52 @@ for pro in problems:
         )
 output += '\n'
 
+# contest_name consistency
+contest_name_groups = {}
+
+for pro in problems:
+    if problemjson_errors[pro] is not None:
+        continue
+
+    contest_name = problemjson[pro]['contest_name']
+    if 'TODO' in contest_name:
+        continue
+    group_key = json.dumps(
+        contest_name,
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    contest_name_groups.setdefault(group_key, []).append(pro)
+
+contest_name_warnings = set()
+
+if len(contest_name_groups) > 1:
+    max_group_size = max(
+        len(group)
+        for group in contest_name_groups.values()
+    )
+
+    largest_groups = [
+        group
+        for group in contest_name_groups.values()
+        if len(group) == max_group_size
+    ]
+
+    if len(largest_groups) == 1:
+        majority_problems = set(largest_groups[0])
+        contest_name_warnings = {
+            pro
+            for pro in problems
+            if problemjson_errors[pro] is None
+            and pro not in majority_problems
+        }
+    else:
+        contest_name_warnings = {
+            pro
+            for pro in problems
+            if problemjson_errors[pro] is None
+        }
+
 # problem info
 keys = [
     'contest_name',
@@ -109,14 +155,27 @@ for key in keys:
             output += ' [:x:](p{}/problem.json)<br>Invalid JSON |'.format(pro)
             continue
 
-        text = ''
-        if isinstance(problemjson[pro][key], str) and 'TODO' in problemjson[pro][key]:
+        value = problemjson[pro][key]
+
+        if isinstance(value, str) and 'TODO' in value:
             icon = ':x:'
+        elif key == 'contest_name' and pro in contest_name_warnings:
+            icon = ':warning:'
         else:
             icon = ':white_check_mark:'
-            if key not in ['contest_name', 'problem_label']:
-                text = '<br>{}'.format(problemjson[pro][key])
-        output += ' [{}](p{}/problem.json){} |'.format(icon, pro, text)
+
+        text = ''
+        if icon != ':x:':
+            if key == 'contest_name':
+                text = '<br>{}'.format(value)
+            elif key not in ['problem_label']:
+                text = '<br>{}'.format(value)
+
+        output += ' [{}](p{}/problem.json){} |'.format(
+            icon,
+            pro,
+            text,
+        )
     output += '\n'
 
 keys = [
