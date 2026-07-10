@@ -1,6 +1,7 @@
 import glob
 import json
 import os
+import sys
 
 os.chdir(os.environ.get('GITHUB_WORKSPACE'))
 
@@ -8,6 +9,22 @@ with open('.problems.json', 'r', encoding='utf8') as f:
     problems = json.load(f)
 
 output = ''
+
+
+def load_json(path):
+    try:
+        with open(path, 'r', encoding='utf8') as f:
+            return json.load(f), None
+    except json.JSONDecodeError as e:
+        error = 'line {}, column {}: {}'.format(
+            e.lineno,
+            e.colno,
+            e.msg,
+        )
+        print('{}: JSON syntax error: {}'.format(path, error),
+              file=sys.stderr)
+        return {}, error
+
 
 # cover
 if os.path.exists('cover.tex'):
@@ -43,15 +60,40 @@ output += '\n'
 
 # problem.json
 problemjson = {}
+problemjson_errors = {}
 for pro in problems:
-    with open('p{}/problem.json'.format(pro), 'r', encoding='utf8') as f:
-        problemjson[pro] = json.load(f)
+    path = 'p{}/problem.json'.format(pro)
+    problemjson[pro], problemjson_errors[pro] = load_json(path)
 
 # subtasks.json
 subtasksjson = {}
+subtasksjson_errors = {}
 for pro in problems:
-    with open('p{}/subtasks.json'.format(pro), 'r', encoding='utf8') as f:
-        subtasksjson[pro] = json.load(f)
+    path = 'p{}/subtasks.json'.format(pro)
+    subtasksjson[pro], subtasksjson_errors[pro] = load_json(path)
+
+# JSON syntax
+output += '| problem.json syntax |'
+for pro in problems:
+    if problemjson_errors[pro] is None:
+        output += ' [:white_check_mark:](p{}/problem.json) |'.format(pro)
+    else:
+        output += ' [:x:](p{}/problem.json)<br>JSON syntax error: {} |'.format(
+            pro,
+            problemjson_errors[pro],
+        )
+output += '\n'
+
+output += '| subtasks.json syntax |'
+for pro in problems:
+    if subtasksjson_errors[pro] is None:
+        output += ' [:white_check_mark:](p{}/subtasks.json) |'.format(pro)
+    else:
+        output += ' [:x:](p{}/subtasks.json)<br>JSON syntax error: {} |'.format(
+            pro,
+            subtasksjson_errors[pro],
+        )
+output += '\n'
 
 # problem info
 keys = [
@@ -63,6 +105,10 @@ keys = [
 for key in keys:
     output += '| {} | '.format(key)
     for pro in problems:
+        if problemjson_errors[pro] is not None:
+            output += ' [:x:](p{}/problem.json)<br>Invalid JSON |'.format(pro)
+            continue
+
         text = ''
         if isinstance(problemjson[pro][key], str) and 'TODO' in problemjson[pro][key]:
             icon = ':x:'
@@ -81,6 +127,10 @@ keys = [
 for key in keys:
     output += '| {} | '.format(key)
     for pro in problems:
+        if problemjson_errors[pro] is not None:
+            output += ' [:x:](p{}/problem.json)<br>Invalid JSON |'.format(pro)
+            continue
+
         output += ' {} |'.format(problemjson[pro][key])
     output += '\n'
 
@@ -117,6 +167,10 @@ for folder in folders:
 # global_validators / subtask_sensitive_validators
 output += '| subtasks.json<br>global_validators / subtask_sensitive_validators | '
 for pro in problems:
+    if subtasksjson_errors[pro] is not None:
+        output += ' [:x:](p{}/subtasks.json)<br>Invalid JSON |'.format(pro)
+        continue
+
     global_validators = subtasksjson[pro].get('global_validators', [])
     subtask_sensitive_validators = subtasksjson[pro].get(
         'subtask_sensitive_validators', []
