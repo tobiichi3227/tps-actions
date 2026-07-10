@@ -5,7 +5,7 @@ import sys
 
 os.chdir(os.environ.get('GITHUB_WORKSPACE'))
 
-with open('.problems.json', 'r', encoding='utf8') as f:
+with open('.problems.json', 'r') as f:
     problems = json.load(f)
 
 output = ''
@@ -13,44 +13,39 @@ output = ''
 
 def load_json(path):
     try:
-        with open(path, 'r', encoding='utf8') as f:
+        with open(path, 'r') as f:
             return json.load(f), None
     except json.JSONDecodeError as e:
-        error = 'line {}, column {}: {}'.format(
-            e.lineno,
-            e.colno,
-            e.msg,
-        )
-        print('{}: JSON syntax error: {}'.format(path, error),
-              file=sys.stderr)
+        error = f'line {e.lineno}, column {e.colno}: {e.msg}'
+        print(f'{path}: JSON syntax error: {error}', file=sys.stderr)
         return {}, error
 
 
 # cover
 if os.path.exists('cover.tex'):
-    with open('cover.tex', 'r', encoding='utf8') as f:
+    with open('cover.tex', 'r') as f:
         content = f.read()
     if 'TODO' in content:
         icon = ':x:'
     else:
         icon = ':white_check_mark:'
-    output += '- cover.tex [{}](cover.tex)\n'.format(icon)
+    output += f'- cover.tex [{icon}](cover.tex)\n'
 
 # appendix
 if os.path.exists('appendix.tex'):
-    with open('appendix.tex', 'r', encoding='utf8') as f:
+    with open('appendix.tex', 'r') as f:
         content = f.read()
     if 'TODO' in content:
         icon = ':x:'
     else:
         icon = ':white_check_mark:'
-    output += '- appendix.tex [{}](appendix.tex)\n'.format(icon)
+    output += f'- appendix.tex [{icon}](appendix.tex)\n'
 
 output += '\n'
 
 output += '| |'
 for pro in problems:
-    output += ' {} |'.format(pro)
+    output += f' {pro} |'
 output += '\n'
 
 output += '|'
@@ -62,37 +57,31 @@ output += '\n'
 problemjson = {}
 problemjson_errors = {}
 for pro in problems:
-    path = 'p{}/problem.json'.format(pro)
+    path = f'p{pro}/problem.json'
     problemjson[pro], problemjson_errors[pro] = load_json(path)
 
 # subtasks.json
 subtasksjson = {}
 subtasksjson_errors = {}
 for pro in problems:
-    path = 'p{}/subtasks.json'.format(pro)
+    path = f'p{pro}/subtasks.json'
     subtasksjson[pro], subtasksjson_errors[pro] = load_json(path)
 
 # JSON syntax
 output += '| problem.json syntax |'
 for pro in problems:
     if problemjson_errors[pro] is None:
-        output += ' [:white_check_mark:](p{}/problem.json) |'.format(pro)
+        output += f' [:white_check_mark:](p{pro}/problem.json) |'
     else:
-        output += ' [:x:](p{}/problem.json)<br>JSON syntax error: {} |'.format(
-            pro,
-            problemjson_errors[pro],
-        )
+        output += f' [:x:](p{pro}/problem.json)<br>JSON syntax error: {problemjson_errors[pro]} |'
 output += '\n'
 
 output += '| subtasks.json syntax |'
 for pro in problems:
     if subtasksjson_errors[pro] is None:
-        output += ' [:white_check_mark:](p{}/subtasks.json) |'.format(pro)
+        output += f' [:white_check_mark:](p{pro}/subtasks.json) |'
     else:
-        output += ' [:x:](p{}/subtasks.json)<br>JSON syntax error: {} |'.format(
-            pro,
-            subtasksjson_errors[pro],
-        )
+        output += f' [:x:](p{pro}/subtasks.json)<br>JSON syntax error: {subtasksjson_errors[pro]} |'
 output += '\n'
 
 # contest_name consistency
@@ -142,21 +131,20 @@ if len(contest_name_groups) > 1:
         }
 
 # problem info
-keys = [
+keys = (
     'contest_name',
     'problem_label',
     'name',
     'title',
-]
+)
 for key in keys:
-    output += '| {} | '.format(key)
+    output += f'| {key} | '
     for pro in problems:
         if problemjson_errors[pro] is not None:
-            output += ' [:x:](p{}/problem.json)<br>Invalid JSON |'.format(pro)
+            output += f' [:x:](p{pro}/problem.json)<br>Invalid JSON |'
             continue
 
         value = problemjson[pro][key]
-
         if isinstance(value, str) and 'TODO' in value:
             icon = ':x:'
         elif key == 'contest_name' and pro in contest_name_warnings:
@@ -167,59 +155,55 @@ for key in keys:
         text = ''
         if icon != ':x:':
             if key == 'contest_name':
-                text = '<br>{}'.format(value)
-            elif key not in ['problem_label']:
-                text = '<br>{}'.format(value)
+                text = f'<br>{value}'
+            elif key not in ('problem_label'):
+                text = f'<br>{value}'
 
-        output += ' [{}](p{}/problem.json){} |'.format(
-            icon,
-            pro,
-            text,
-        )
+        output += f' [{icon}](p{pro}/problem.json){text} |'
     output += '\n'
 
-keys = [
+keys = (
     'memory_limit',
     'time_limit',
     'has_checker',
-]
+)
 for key in keys:
-    output += '| {} | '.format(key)
+    output += f'| {key} | '
     for pro in problems:
         if problemjson_errors[pro] is not None:
-            output += ' [:x:](p{}/problem.json)<br>Invalid JSON |'.format(pro)
+            output += f' [:x:](p{pro}/problem.json)<br>Invalid JSON |'
             continue
 
-        output += ' {} |'.format(problemjson[pro][key])
+        output += f' {problemjson[pro][key]} |'
     output += '\n'
 
 # gen/solution/validator
-folders = [
+folders = (
     'gen',
     'solution',
     'validator',
-]
+)
 for folder in folders:
-    output += '| {} |'.format(folder)
+    output += f'| {folder} |'
     for pro in problems:
         todos = []
-        for file in glob.glob('p{}/{}/**'.format(pro, folder), recursive=True):
+        for file in glob.glob(f'p{pro}/{folder}/**', recursive=True):
             if os.path.isdir(file):
                 continue
-            with open(file, 'r', encoding='utf8') as f:
+            with open(file, 'r') as f:
                 try:
                     content = f.read()
                 except Exception as e:
-                    print('Ignore {}'.format(file))
+                    print(f'Ignore {file}')
                     continue
                 if 'TODO' in content:
                     todos.append(file)
         if len(todos) == 0:
-            output += ' [:white_check_mark:](p{}/{}) |'.format(pro, folder)
+            output += f' [:white_check_mark:](p{pro}/{folder}) |'
         else:
-            output += ' [:x:](p{}/{})'.format(pro, folder)
+            output += f' [:x:](p{pro}/{folder})'
             for file in todos:
-                output += '<br>[{}]({})'.format(os.path.basename(file), file)
+                output += f'<br>[{os.path.basename(file)}]({file})'
             output += ' |'
     output += '\n'
 
@@ -227,7 +211,7 @@ for folder in folders:
 output += '| subtasks.json<br>global_validators / subtask_sensitive_validators | '
 for pro in problems:
     if subtasksjson_errors[pro] is not None:
-        output += ' [:x:](p{}/subtasks.json)<br>Invalid JSON |'.format(pro)
+        output += f' [:x:](p{pro}/subtasks.json)<br>Invalid JSON |'
         continue
 
     global_validators = subtasksjson[pro].get('global_validators', [])
@@ -255,46 +239,46 @@ for pro in problems:
         icon = ':white_check_mark:'
         text = ''
 
-    output += ' [{}](p{}/subtasks.json){} |'.format(icon, pro, text)
+    output += f' [{icon}](p{pro}/subtasks.json){text} |'
 
 output += '\n'
 
 # tests
 output += '| tests |'
 for pro in problems:
-    if os.path.exists('p{}/tests/0-01.in'.format(pro)):
+    if os.path.exists(f'p{pro}/tests/0-01.in'):
         icon = ':white_check_mark:'
     else:
         icon = ':x:'
     auto = ''
-    if os.path.exists('p{}/gen/DISABLE_AUTO_BUILD'.format(pro)):
-        auto = '<br>[Auto build disabled](p{}/gen/DISABLE_AUTO_BUILD)'.format(pro)
-    output += ' [{}](p{}/tests){} |'.format(icon, pro, auto)
+    if os.path.exists(f'p{pro}/gen/DISABLE_AUTO_BUILD'):
+        auto = f'<br>[Auto build disabled](p{pro}/gen/DISABLE_AUTO_BUILD)'
+    output += f' [{icon}](p{pro}/tests){auto} |'
 output += '\n'
 
 # statement
 output += '| statement/index.md |'
 for pro in problems:
-    with open('p{}/statement/index.md'.format(pro), 'r', encoding='utf8') as f:
+    with open(f'p{pro}/statement/index.md', 'r') as f:
         content = f.read()
 
     if 'TODO' in content:
         icon = ':x:'
     else:
         icon = ':white_check_mark:'
-    output += ' [{}](p{}/statement/index.md) |'.format(icon, pro)
+    output += f' [{icon}](p{pro}/statement/index.md) |'
 output += '\n'
 
 output += '| statement/index.pdf |'
 for pro in problems:
-    if os.path.exists('p{}/statement/index.pdf'.format(pro)):
+    if os.path.exists(f'p{pro}/statement/index.pdf'):
         icon = ':white_check_mark:'
     else:
         icon = ':x:'
     auto = ''
-    if os.path.exists('p{}/statement/DISABLE_AUTO_BUILD'.format(pro)):
-        auto = '<br>[Auto build disabled](p{}/statement/DISABLE_AUTO_BUILD)'.format(pro)
-    output += ' [{}](p{}/statement/index.pdf){} |'.format(icon, pro, auto)
+    if os.path.exists(f'p{pro}/statement/DISABLE_AUTO_BUILD'):
+        auto = f'<br>[Auto build disabled](p{pro}/statement/DISABLE_AUTO_BUILD)'
+    output += f' [{icon}](p{pro}/statement/index.pdf){auto} |'
 output += '\n'
 
 output = output.lstrip()
@@ -302,7 +286,7 @@ output = output.lstrip()
 reportpath = os.environ.get('REPORTPATH')
 
 try:
-    with open(reportpath, 'r', encoding='utf8') as f:
+    with open(reportpath, 'r') as f:
         text = f.read()
 except FileNotFoundError:
     text = ''
@@ -313,10 +297,10 @@ try:
     idx1 = text.index(flag1)
     idx2 = text.index(flag2)
 except ValueError:
-    text += '\n## Progress\n{}\n{}\n'.format(flag1, flag2)
+    text += f'\n## Progress\n{flag1}\n{flag2}\n'
     idx1 = text.index(flag1)
     idx2 = text.index(flag2)
 
 text = text[:idx1] + flag1 + '\n\n' + output + '\n' + text[idx2:]
-with open(reportpath, 'w', encoding='utf8') as f:
+with open(reportpath, 'w') as f:
     f.write(text)
