@@ -1,0 +1,97 @@
+name: Convert TPS problem to TOJ problem
+
+on:
+  workflow_call:
+    inputs:
+      problems:
+        default: ''
+        type: string
+      runs-on:
+        default: 'ubuntu-latest'
+        required: false
+        type: string
+
+jobs:
+  pre-convert:
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 3
+    outputs:
+      problems: ${{ steps.run-problems.outputs.problemsjson }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Allow Git to access workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Get changes
+        if: github.event_name == 'push'
+        id: changes
+        uses: tobiichi3227/tps-actions/.github/actions/get-changes@main
+
+      - name: Check push
+        if: github.event_name == 'push'
+        env:
+          CHANGES: ${{ steps.changes.outputs.changes }}
+        run: |
+          echo "$CHANGES"
+          echo "REQUEST=${{ fromJson(steps.changes.outputs.changes).verify }}" >> $GITHUB_ENV
+
+      - name: Check dispatch
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo "REQUEST=${{ inputs.problems }}" >> $GITHUB_ENV
+
+      - name: Filter problems
+        id: run-problems
+        uses: TNFSH-Programming-Contest/tps-actions/.github/actions/run-problems@main
+        with:
+          requests: ${{ env.REQUEST }}
+
+  convert:
+    needs: [pre-convert]
+    if: needs.pre-convert.outputs.problems != '[]'
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 3
+    strategy:
+      matrix:
+        problem: ${{ fromJson(needs.pre-convert.outputs.problems) }}
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Allow Git to access workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Prepare
+        run: |
+          mkdir upload
+          git clone --depth=1 https://github.com/TFcis/tps2toj
+
+      - name: Convert
+        working-directory: p${{ matrix.problem }}
+        shell: bash
+        run: |
+          cd ..
+          python3 tps2toj/tps2toj.py p${{ matrix.problem }} upload/p${{ matrix.problem }}
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-p${{ matrix.problem }}
+          path: upload/*.tar.xz
+          if-no-files-found: error
+
+  merge:
+    needs: [pre-convert, convert]
+    if: needs.pre-convert.outputs.problems != '[]'
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 3
+
+    steps:
+      - name: Merge packages
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: package
+          pattern: package-p*
+          delete-merged: true
