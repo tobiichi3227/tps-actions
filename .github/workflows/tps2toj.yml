@@ -10,6 +10,10 @@ on:
         default: 'ubuntu-latest'
         required: false
         type: string
+      timeout-minutes:
+        default: 15
+        required: false
+        type: number
 
 jobs:
   pre-convert:
@@ -51,7 +55,7 @@ jobs:
     needs: [pre-convert]
     if: needs.pre-convert.outputs.problems != '[]'
     runs-on: ${{ inputs.runs-on }}
-    timeout-minutes: 3
+    timeout-minutes: ${{ inputs.timeout-minutes }}
     strategy:
       matrix:
         problem: ${{ fromJson(needs.pre-convert.outputs.problems) }}
@@ -86,7 +90,7 @@ jobs:
     needs: [pre-convert, convert]
     if: needs.pre-convert.outputs.problems != '[]'
     runs-on: ${{ inputs.runs-on }}
-    timeout-minutes: 3
+    timeout-minutes: ${{ inputs.timeout-minutes }}
 
     steps:
       - name: Merge packages
