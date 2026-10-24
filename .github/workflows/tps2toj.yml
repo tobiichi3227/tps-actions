@@ -18,7 +18,7 @@ on:
 jobs:
   pre-convert:
     runs-on: ${{ inputs.runs-on }}
-    timeout-minutes: 3
+    timeout-minutes: ${{ inputs.timeout-minutes }}
     outputs:
       problems: ${{ steps.run-problems.outputs.problemsjson }}
     steps:
